@@ -79,7 +79,8 @@ of the initial repository.
 
 **Note:** Your intermediate representation might be data structures from the
 `picolib` library, or it might be portions of your internal DSL, or a
-combination of both.
+combination of both. In some cases, you might not need to create _all_ the 
+packages described above.
 
 ### Errors
 
