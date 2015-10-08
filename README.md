@@ -28,8 +28,8 @@ discussed in class.
      architecture we discussed in class (more details below), and use parser
      combinators to implement your parser.
      - Include at least two example programs
-       - [ ] `Empty.bot`
-       - [ ] `RightHand.bot`
+        - [ ] `Empty.bot`
+        - [ ] `RightHand.bot`
      - [ ] Provide instructions for how to run piconot on a file in `build.md`
      - [ ] Describe your implementation process in `evaluation.md`
   - [ ] Critique another team's design and implementation
