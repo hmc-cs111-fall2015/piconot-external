@@ -1,7 +1,7 @@
 [Teams]: https://github.com/hmc-cs111-fall2015/piconot-external/wiki/Team-sign-ups
 [API]: http://www.cs.hmc.edu/courses/2015/fall/cs111/picolib/index.html#package
-[ParserCombinatorResource]: http://bitwalker.org/blog/2013/08/10/learn-by-example-scala-parser-combinators/
-[ParserCombinatorAPI]: http://www.scala-lang.org/files/archive/api/2.11.7/scala-parser-combinators/#package
+[ParserCombinatorResource]: http://bitwalker.org/scala/programming/tutorial/2013/08/10/learn-by-example-scala-parser-combinators/
+[ParserCombinatorAPI]: http://www.scala-lang.org/files/archive/api/2.11.7/scala-parser-combinators/#scala.util.parsing.combinator.package
 
 # Piconot: The externaling
 ###### _Submission deadline: Wednesday, Oct. 14 at 11:59pm_
