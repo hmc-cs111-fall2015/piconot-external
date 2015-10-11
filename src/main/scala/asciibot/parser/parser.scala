@@ -70,9 +70,10 @@ object AsciibotParser {
   }
 
   def parseRule(lines: Seq[String], start: Int, end: Int) : Rule = {
+    def throwBE(m : String) = throw new BlockError(m, start, end, 0)
     val arrowStart = lines(1).indexOfSlice("->", start)
     if (arrowStart < start || arrowStart >= end) {
-      throw new BlockError("No arrow found", start, end, 0)
+      throwBE("No arrow found")
     }
     val (inStateStart, inStateEnd) = trimBlock(lines, start, arrowStart)
     val (outStateStart, outStateEnd) = trimBlock(lines, arrowStart + 2, end) 
@@ -94,6 +95,7 @@ object AsciibotParser {
   }
 
   def parseInState(a: Seq[String], start: Int, end: Int) : (Surroundings, State) = {
+    def throwBE(m : String) = throw new BlockError(m, start, end, 0)
     assert(a.length == 3)
     val state_str = a(1).slice(start+1,end-1)
     // Check to make sure there are no illegal characters in the state name
@@ -106,7 +108,7 @@ object AsciibotParser {
         || a(0)(end-1) != ' '
         || a(2)(start) != ' '
         || a(2)(end-1) != ' ') {
-        throw new BlockError("Corners of state box not empty", start, end, 0)
+        throwBE("Corners of state box not empty")
     }
 
     // NEWS order, strings
@@ -128,8 +130,43 @@ object AsciibotParser {
   }
 
   def parseOutState(a: Seq[String], start: Int, end: Int) : (MoveDirection, State) = {
+    def throwBE(m : String) = throw new BlockError(m, start, end, 0)
+  
     //println(s"parseOutState: $a")
     assert(a.length == 3)
+
+    val sym = "[xo*]"
+    val id = "[^xo*\\-> |]*"
+    // >0 spaces, then either an x, o, or *, or a state name, then >0 spaces
+    val topBotRegex = s"""^ +(${id}|${sym}) +$$""".r
+    // id or sym, id or spaces, id or sym
+    val midRegex = s"""^(${id}|${sym})(${id}| +)(${id}|${sym})$$""".r
+
+    val tmo = topBotRegex findPrefixMatchOf a(0).slice(start,end)
+    val mmo = midRegex findPrefixMatchOf a(1).slice(start,end)
+    val bmo = topBotRegex findPrefixMatchOf a(2).slice(start,end)
+
+    // Unwrap options and make sure the regex was matched
+    val tm : Match = tmo getOrElse throwBE("Top row malformed")
+    val mm : Match = mmo getOrElse throwBE("Middle row malformed")
+    val bm : Match = bmo getOrElse throwBE("Bottom row malformed")
+
+    // Verify column alignment
+    if (tm.start(1) < mm.start(2) || tm.end(1) > mm.end(2)) {
+      throwBE("top and middle not aligned")
+    }
+    if (bm.start(1) < mm.start(2) || bm.end(1) > mm.end(2)) {
+      throwBE("middle and bottom not aligned")
+    }
+    
+    // Strings that are in the north, east, west, south, and center positions
+    val matches = List(tm.group(1), mm.group(3), mm.group(1), bm.group(1), mm.group(2))
+
+    // Make sure only one state is specified
+
+    // Make sure that output surroundings match input surroundings
+    // TODO
+
     if ("xo*" contains a(1)(start)) {
       if ("xo*" contains a(1)(end-1)) {
         // search each row's middle column for special characters.

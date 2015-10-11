@@ -33,7 +33,7 @@ object AsciiBot extends App {
   object ourBot extends Picobot(Maze(args(0)), rules)
     with TextDisplay //with semantics.GUIDisplay
 
-  ourBot.run()
+  //ourBot.run()
 
   //stage = EmptyBot.mainStage
 }
