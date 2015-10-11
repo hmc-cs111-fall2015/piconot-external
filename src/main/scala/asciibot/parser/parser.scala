@@ -8,6 +8,7 @@ import picolib.semantics._
 
 case class BlockError(m: String, sc: Int, ec: Int, line: Int) extends RuntimeException
 case class LineError(m: String, line: Int) extends RuntimeException
+case class FileError(m: String) extends RuntimeException
 
 object AsciibotParser {
 
@@ -31,6 +32,9 @@ object AsciibotParser {
         }
       }
     } }
+    if (!lines.isEmpty) {
+      throw new FileError("File ended in middle of rule")
+    }
     rules.toList
   }
 

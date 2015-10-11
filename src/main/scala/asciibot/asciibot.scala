@@ -23,6 +23,9 @@ object AsciiBot extends App {
     case LineError(m,line) =>
       println(s"Error: line ${line+1}: $m")
       List()
+    case FileError(m) =>
+      println(s"Error: $m")
+      List()
   }
   println(rules)
 
