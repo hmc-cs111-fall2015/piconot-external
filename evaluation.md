@@ -12,3 +12,10 @@ to correctly parse a correct program, we are not sure that it will *not* accept
 programs that are not correct and what kind of errors it will give. We are
 trying to improve this but it's hard to check all the cases. If we were using
 the library it would cover the edge cases automatically.
+
+One change we made was that we initially had x to specify that a direction was
+blocked, but we changed to # because x was used in the original picobot as
+unblocked.
+
+We also added better error handling. Then we changed "o" to "_" so that we could
+use "o"s in state names, and added comments with //

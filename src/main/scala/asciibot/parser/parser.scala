@@ -3,7 +3,6 @@ package asciibot.parser
 import java.io.BufferedReader
 
 import scala.collection.mutable.MutableList
-import scala.io.Source
 import picolib.maze.Maze
 import picolib.semantics._
 
@@ -12,21 +11,16 @@ case class LineError(m: String, line: Int) extends RuntimeException
 
 object AsciibotParser {
 
-  //// Error if rules are separated incorrectly (not with 3 vertical '|'s)
-  //case class RuleSeparatorError(colNum: Int) extends ParserError
-  //// Error if a state name is bad
-  //case class StateNameError(stateName: String) extends ParserError
-  // Generic syntax error
-
-  def parseFile(f: String) : List[Rule] = {
+  def parseLines(program: Iterator[String]) : List[Rule] = {
     val lines: MutableList[String]= new MutableList
     val rules: MutableList[Rule] = new MutableList
-    Source.fromFile(f).getLines().zipWithIndex foreach { case (line, lineNum) =>  
-      if (line.equals("")) {
+    program.zipWithIndex foreach { case (line, lineNum) => {
+      val noComment = line.split("//")(0)
+      if (noComment.trim.equals("")) {
         if (lines.length > 0)
           throw new LineError("Blank line in middle of rule", lineNum)
       } else {
-        lines += line
+        lines += noComment
         if (lines.length == 3) {
           try {
             rules ++= parseLine(lines)
@@ -36,7 +30,7 @@ object AsciibotParser {
           lines.clear
         }
       }
-    }
+    } }
     rules.toList
   }
 
@@ -78,7 +72,7 @@ object AsciibotParser {
     val (inStateStart, inStateEnd) = trimBlock(lines, start, arrowStart)
     val (outStateStart, outStateEnd) = trimBlock(lines, arrowStart + 2, end) 
     val (surrs, inState) = parseInState(lines, inStateStart, inStateEnd)
-    val (md, outState) = parseOutState(lines, outStateStart, outStateEnd)
+    val (md, outState) = parseOutState(lines, outStateStart, outStateEnd, surrs)
     Rule(inState, surrs, md, outState)
   }
 
@@ -99,7 +93,7 @@ object AsciibotParser {
     assert(a.length == 3)
     val state_str = a(1).slice(start+1,end-1)
     // Check to make sure there are no illegal characters in the state name
-    if ("x*o|-> " exists (state_str contains _)) {
+    if ("#*_|-/> " exists (state_str contains _)) {
       //throw new StateNameError(state_str)
       throw new BlockError(s"Bad state name `$state_str'", start, end, 0)
     }
@@ -120,8 +114,8 @@ object AsciibotParser {
     )
 
     val surrs = str_surrs map (_ match {
-        case (_, "x") => Blocked
-        case (_, "o") => Open
+        case (_, "#") => Blocked
+        case (_, "_") => Open
         case (_, "*") => Anything
         case (dir, s) => throw new BlockError(s"Invalid Surrounding `$s' for $dir side", start, end, 0)
       })
@@ -129,15 +123,18 @@ object AsciibotParser {
     (Surroundings(surrs(0), surrs(1), surrs(2), surrs(3)), State(state_str))
   }
 
-  def parseOutState(a: Seq[String], start: Int, end: Int) : (MoveDirection, State) = {
+  def parseOutState(a: Seq[String],
+                    start: Int,
+                    end: Int,
+                    surrs: Surroundings) : (MoveDirection, State) = {
     def throwBE(m : String) = throw new BlockError(m, start, end, 0)
   
     //println(s"parseOutState: $a")
     assert(a.length == 3)
 
-    val sym = "[xo*]"
-    val id = "[^xo*\\-> |]*"
-    // >0 spaces, then either an x, o, or *, or a state name, then >0 spaces
+    val sym = "[#_*]"
+    val id = "[^#_*/\\-> |]*"
+    // >0 spaces, then either an #, o, or *, or a state name, then >0 spaces
     val topBotRegex = s"""^ +(${id}|${sym}) +$$""".r
     // id or sym, id or spaces, id or sym
     val midRegex = s"""^(${id}|${sym})(${id}| +)(${id}|${sym})$$""".r
@@ -147,9 +144,9 @@ object AsciibotParser {
     val bmo = topBotRegex findPrefixMatchOf a(2).slice(start,end)
 
     // Unwrap options and make sure the regex was matched
-    val tm : Match = tmo getOrElse throwBE("Top row malformed")
-    val mm : Match = mmo getOrElse throwBE("Middle row malformed")
-    val bm : Match = bmo getOrElse throwBE("Bottom row malformed")
+    val tm = tmo getOrElse throwBE("Top row malformed")
+    val mm = mmo getOrElse throwBE("Middle row malformed")
+    val bm = bmo getOrElse throwBE("Bottom row malformed")
 
     // Verify column alignment
     if (tm.start(1) < mm.start(2) || tm.end(1) > mm.end(2)) {
@@ -162,39 +159,35 @@ object AsciibotParser {
     // Strings that are in the north, east, west, south, and center positions
     val matches = List(tm.group(1), mm.group(3), mm.group(1), bm.group(1), mm.group(2))
 
+    println("matches are " +  matches)
+
     // Make sure only one state is specified
+    val numOutputStates = matches count {s => !("#_* " contains s(0))}
+    if ( 1 != numOutputStates ) {
+      throwBE(s"$numOutputStates output states were provided")
+    }
 
     // Make sure that output surroundings match input surroundings
-    // TODO
-
-    if ("xo*" contains a(1)(start)) {
-      if ("xo*" contains a(1)(end-1)) {
-        // search each row's middle column for special characters.
-        val moveTop = !("x*o|-> " exists { a(0).slice(start+1,end-1) contains _ })
-        val noMove  = !("x*o|-> " exists { a(1).slice(start+1,end-1) contains _ })
-        val moveBot = !("x*o|-> " exists { a(2).slice(start+1,end-1) contains _ })
-        val moveRows = List(moveTop, noMove, moveBot).zipWithIndex
-                      .filter{ case (bool, _) => bool }
-                      .map{case (bool, i) => i};
-        // If multiple matches, then which way to move is ambiguous
-        if (moveRows.length != 1) {
-          throw new BlockError(s"Move direction is ambiguous", start, end, 0)
-        }
-        // The row without any special characters is the direction we move
-        val moveRow = moveRows(0)
-        val moveDir = moveRow match {
-          case 0 => North
-          case 1 => StayHere
-          case 2 => South
-        }
-        (moveDir, State(a(moveRow).slice(start+1,end-1)))
-      } else { // move direction is to the right!
-        // Check for errors
-        (East, State(a(1).slice(start+2,end)))
+    val Surroundings(inTop, inRight, inLeft, inBot) = surrs
+    val inSurrList = List(inTop, inRight, inLeft, inBot)
+    inSurrList zip matches.slice(0,4) foreach { _ match {
+      case (Blocked, "#") => ()
+      case (Open, "_") => ()
+      case (Anything, "*") => ()
+      case (_, s) if !("#_*" contains s(0)) => () // Surrounding in input, state in output
+      case (i,o) => throwBE(s"Surrounding mismatch: ${surrToChar(i)} to $o")
       }
-    } else { // move direction is left
-      // Check for errors
-      (West, State(a(1).slice(start, end-2)))
     }
+
+    val moveDirIdx = matches indexWhere (s => !("#_*" contains s(0)))
+    val moveDir = List(North, East, West, South, StayHere)(moveDirIdx)
+    val nextState = State(matches(moveDirIdx))
+    (moveDir, nextState)
+  }
+
+  def surrToChar(s: RelativeDescription) : String = s match {
+    case Blocked => "#"
+    case Open => "_"
+    case Anything => "*"
   }
 }
