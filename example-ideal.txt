@@ -1,0 +1,50 @@
+# A Picobot program that can fill an empty room
+
+# States 1 and 2: move to the top left
+
+
+# State 1: move left
+
+If you are holding your first weapon and there is
+nothing towards the Undying Lands, 
+go towards the Undying Lands and ready your first weapon.
+
+If you are holding your first weapon and there are
+orcs towards the Undying Lands, 
+go towards the Shire and ready your second weapon.
+
+# State 2: move up
+
+If you are holding your second weapon
+and there is nothing towards the Shire,
+go towards the Shire and ready your second weapon.
+
+If you are holding your second weapon,
+and there are orcs towards the Shire
+and nothing towards Mordor,
+go towards Mordor and ready your third weapon.
+
+
+# States 3 and 4: fill from top to bottom, left to right
+
+# State 3: fill this column to the bottom
+
+If you are holding your third weapon,
+and there is nothing towards Mordor,
+go towards Mordor and ready your third weapon.
+
+If you are holding your third weapon and there is
+nothing towards the Lonely Mountain
+and orcs towards Mordor,
+go towards the Lonely Mountain and ready your fourth weapon.
+
+# State 4: fill this column to the top
+
+If you are holding your fourth weapon
+and there is nothing towards the Shire,
+go towards the Shire and ready your fourth weapon.
+
+If you are holding your fourth weapon,
+and there are orcs towards the Shire
+and nothing towards the Lonely Mountain,
+go towards the Lonely Mountain and ready your third weapon.
