@@ -9,28 +9,30 @@ import picolib.semantics._
  * @author Zoab
  */
 object PicoParser extends JavaTokenParsers with PackratParsers {
-  def apply(s: String): ParseResult[AST] = parseAll(expr,s)
+  def apply(s: String): ParseResult[List[RuleBuilder]] = parseAll(program,s)
   
-  lazy val expr: PackratParser[Expr] = 
+  def program: Parser[List[RuleBuilder]] = expr*
+  
+  lazy val expr: PackratParser[RuleBuilder] = 
     ( startState~"and"~surroundings~"then"~direction~"and"~finalState~"." 
         ^^ {case a~"and"~b~"then"~c~"and"~d~"." => 
           RuleBuilder(a, b, c, d)}
         )
    
-   lazy val startState: PackratParser[InitialStateSetter] = 
-     ( "If you are holding weapon "~weapon ^^ {case "If you are holding weapon "~w => InitialStateSetter(w)}
+   lazy val startState: PackratParser[State] = 
+     ( "If you are holding weapon "~weapon ^^ {case "If you are holding weapon "~w => w}
          )
          
    def weapon: Parser[State] = wholeNumber ^^ {x => State(x.toString())}
   
-  lazy val direction: PackratParser[DirectionSetter] = 
-    ( "go towards the Shire" ^^ {case "go towards the Shire" => DirectionSetter(North)} |
-      "go towards the Lonely Mountain" ^^ {case "go towards the Lonely Mountain" => DirectionSetter(East)} |
-      "go towards the Undying Lands" ^^ {case "go towards the Undying Lands" => DirectionSetter(West)} |
-      "go towards Mordor" ^^ {case "go towards Mordor" => DirectionSetter(South)})
+  lazy val direction: PackratParser[MoveDirection] = 
+    ( "go towards the Shire" ^^ {case "go towards the Shire" => North} |
+      "go towards the Lonely Mountain" ^^ {case "go towards the Lonely Mountain" => East} |
+      "go towards the Undying Lands" ^^ {case "go towards the Undying Lands" => West} |
+      "go towards Mordor" ^^ {case "go towards Mordor" => South})
       
-  lazy val finalState: PackratParser[FinalStateSetter] = 
-     ( "ready weapon "~weapon ^^ {case "ready weapon "~w => FinalStateSetter(w)}
+  lazy val finalState: PackratParser[State] = 
+     ( "ready weapon "~weapon ^^ {case "ready weapon "~w => w }
          )
          
   lazy val surroundings: PackratParser[SurroundingSetter] = 
