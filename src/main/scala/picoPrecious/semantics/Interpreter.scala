@@ -1,4 +1,4 @@
-package picoPrecious.semantics
+package picoPrecious
 
 import picolib.semantics._
 import picoPrecious.ir._
@@ -6,7 +6,7 @@ import picoPrecious.ir._
 /**
  * @author Zoab
  */
-package object Semantics {
+package object semantics {
     def eval(rules: List[RuleBuilder]): List[Rule] = 
      rules.map { x => evaluateRule(x) }
     
