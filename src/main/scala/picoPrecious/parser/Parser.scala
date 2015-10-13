@@ -14,8 +14,8 @@ object PicoParser extends JavaTokenParsers with PackratParsers {
   def program: Parser[List[RuleBuilder]] = expr*
   
   lazy val expr: PackratParser[RuleBuilder] = 
-    ( startState~surroundings~"then"~direction~"and"~finalState~"." 
-        ^^ {case a~b~"then"~c~"and"~d~"." => 
+    ( startState~surroundings~direction~finalState~"." 
+        ^^ {case a~b~c~d~"." => 
           RuleBuilder(a, b, c, d)}
         )
    
@@ -26,14 +26,15 @@ object PicoParser extends JavaTokenParsers with PackratParsers {
    def weapon: Parser[State] = wholeNumber ^^ {x => State(x.toString())}
   
   lazy val direction: PackratParser[MoveDirection] = 
-    ( "go towards the Shire" ^^ {case "go towards the Shire" => North} |
-      "go towards the Lonely Mountain" ^^ {case "go towards the Lonely Mountain" => East} |
-      "go towards the Undying Lands" ^^ {case "go towards the Undying Lands" => West} |
-      "go towards Mordor" ^^ {case "go towards Mordor" => South} |
-      "stay" ^^ {case "stay" => StayHere})
+    ( "then go towards the Shire" ^^ {case "then go towards the Shire" => North} |
+      "then go towards the Lonely Mountain" ^^ {case "then go towards the Lonely Mountain" => East} |
+      "then go towards the Undying Lands" ^^ {case "then go towards the Undying Lands" => West} |
+      "then go towards Mordor" ^^ {case "then go towards Mordor" => South} |
+      "then stay" ^^ {case "then stay" => StayHere})
       
   lazy val finalState: PackratParser[State] = 
-     ( "ready weapon "~weapon ^^ {case "ready weapon "~w => w }
+     ( "and ready weapon "~weapon ^^ {case "and ready weapon "~w => w } |
+       "" ^^ {case "" => null}
          )
          
   lazy val surroundings: PackratParser[SurroundingSetter] = 

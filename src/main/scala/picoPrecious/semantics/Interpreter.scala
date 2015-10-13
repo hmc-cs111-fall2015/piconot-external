@@ -25,6 +25,6 @@ package object semantics {
       }
       rule.surroundings.directions.map(buildDirection)
       Rule(rule.initialState, Surroundings(northContents,eastContents,westContents,southContents),
-          rule.direction, rule.finalState)
+          rule.direction, if (rule.finalState == null) rule.initialState else rule.finalState)
     }
 }

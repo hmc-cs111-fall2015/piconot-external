@@ -1,25 +1,25 @@
 If you are holding weapon 1 and there is nothing towards the Undying Lands, 
-then go towards the Undying Lands and ready weapon 1.
+then go towards the Undying Lands.
 
 If you are holding weapon 1 and there are orcs towards the Undying Lands, 
 then stay and ready weapon 2.
 
 If you are holding weapon 2 and there is nothing towards the Shire,
-then go towards the Shire and ready weapon 2.
+then go towards the Shire.
 
 If you are holding weapon 2 and there are orcs towards the Shire,
 and there is nothing towards Mordor,
 then go towards Mordor and ready weapon 3.
 
 If you are holding weapon 3 and there is nothing towards Mordor,
-then go towards Mordor and ready weapon 3.
+then go towards Mordor.
 
 If you are holding weapon 3 and there is nothing towards the Lonely Mountain, 
 and there are orcs towards Mordor,
 then go towards the Lonely Mountain and ready weapon 4.
 
 If you are holding weapon 4 and there is nothing towards the Shire,
-then go towards the Shire and ready weapon 4.
+then go towards the Shire.
 
 If you are holding weapon 4 and there are orcs towards the Shire,
 and there is nothing towards the Lonely Mountain,
