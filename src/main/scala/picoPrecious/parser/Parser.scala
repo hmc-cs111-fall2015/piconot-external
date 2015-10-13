@@ -14,8 +14,8 @@ object PicoParser extends JavaTokenParsers with PackratParsers {
   def program: Parser[List[RuleBuilder]] = expr*
   
   lazy val expr: PackratParser[RuleBuilder] = 
-    ( startState~"and"~surroundings~"then"~direction~"and"~finalState~"." 
-        ^^ {case a~"and"~b~"then"~c~"and"~d~"." => 
+    ( startState~surroundings~"then"~direction~"and"~finalState~"." 
+        ^^ {case a~b~"then"~c~"and"~d~"." => 
           RuleBuilder(a, b, c, d)}
         )
    
@@ -29,24 +29,20 @@ object PicoParser extends JavaTokenParsers with PackratParsers {
     ( "go towards the Shire" ^^ {case "go towards the Shire" => North} |
       "go towards the Lonely Mountain" ^^ {case "go towards the Lonely Mountain" => East} |
       "go towards the Undying Lands" ^^ {case "go towards the Undying Lands" => West} |
-      "go towards Mordor" ^^ {case "go towards Mordor" => South})
+      "go towards Mordor" ^^ {case "go towards Mordor" => South} |
+      "stay" ^^ {case "stay" => StayHere})
       
   lazy val finalState: PackratParser[State] = 
      ( "ready weapon "~weapon ^^ {case "ready weapon "~w => w }
          )
          
   lazy val surroundings: PackratParser[SurroundingSetter] = 
-    (surrounding~","~surrounding~","~surrounding~","~surrounding~"," ^^ {case s1~","~s2~","~s3~","~s4~"," => 
-      SurroundingSetter(s1,s2,s3,s4)} |
-     surrounding~","~surrounding~","~surrounding~"," ^^ {case s1~","~s2~","~s3~"," => 
-      SurroundingSetter(s1,s2,s3,null)} |
-     surrounding~","~surrounding~"," ^^ {case s1~","~s2~"," => 
-      SurroundingSetter(s1,s2,null,null)} |
-     surrounding~"," ^^ {case s1~"," => 
-      SurroundingSetter(s1,null,null,null)})
+    (surrounding ^^ {case s => SurroundingSetter(s)} 
+    )
           
-  lazy val surrounding: PackratParser[DirectionAndContents] = 
-    ( contents~"towards"~location ^^ {case c~"towards"~l => c towards l }
+  lazy val surrounding: PackratParser[List[DirectionAndContents]] = 
+    ( "and"~contents~"towards"~location~","~surrounding ^^ {case "and"~c~"towards"~l~","~s => (c towards l)::s } |
+      "" ^^ {case "" => List() }
         )
    
    lazy val contents: Parser[RelativeDescription] = 

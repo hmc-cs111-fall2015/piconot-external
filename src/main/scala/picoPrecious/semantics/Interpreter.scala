@@ -21,13 +21,9 @@ package object semantics {
           case a if a.dir == East => eastContents = a.contents
           case a if a.dir == West => westContents = a.contents
           case a if a.dir == South => southContents = a.contents
-          case null => Nil
         }
       }
-      buildDirection(rule.surroundings.s1)
-      buildDirection(rule.surroundings.s2)
-      buildDirection(rule.surroundings.s3)
-      buildDirection(rule.surroundings.s4)
+      rule.surroundings.directions.map(buildDirection)
       Rule(rule.initialState, Surroundings(northContents,eastContents,westContents,southContents),
           rule.direction, rule.finalState)
     }

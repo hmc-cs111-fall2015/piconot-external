@@ -15,7 +15,7 @@ object pico extends JFXApp {
     val args = parameters.raw
     
     if (args.length != 2) {
-      println("Not the right number of arguments!")
+      println(s"Not the right number of arguments: Got ${args.length}, expected 2")
       sys.exit(1)
     }
     
