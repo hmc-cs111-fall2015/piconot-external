@@ -47,9 +47,13 @@ package object ErrorChecker {
       var westCount: Int = 0
       var southCount: Int = 0
       rule.surroundings.directions.foreach { 
-        x => if (x.dir == North) northCount += 1 else if (x.dir == East) eastCount += 1 
-        else if (x.dir == West) westCount += 1 else if (x.dir == South) southCount += 1
-        else throw new IllegalArgumentException("Surrounding direction must be North, South, East, or West")
+        x => x.dir match {
+          case North => northCount += 1
+          case East => eastCount += 1
+          case West => westCount += 1
+          case South => southCount += 1
+          case _ => throw new IllegalArgumentException("Surrounding direction must be North, South, East, or West")
+        }
       }
       if (northCount > 1 || eastCount > 1 || westCount > 1 || southCount > 1) {
         throw new DuplicateSurroundingsException("You specified a surrounding more than once!")
