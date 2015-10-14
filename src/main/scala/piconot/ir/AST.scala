@@ -24,13 +24,13 @@ case class BracedTransformers(multiTrans: MultiTransformers) extends Transformer
 //case class Transformers(trans: multiTransformers) extends Transform
 
 case class SingleMultiTransformers(t: Transformer) extends MultiTransformers
-case class MutlipleMultiTrasnformers(transL: Transformer, multiT: MultiTransformers) extends MultiTransformers
+case class MutlipleMultiTransformers(transL: Transformer, multiT: MultiTransformers) extends MultiTransformers
 
 case class Move(dir: MoveDirection) extends Augment
 case class Stay() extends Augment
 case class Restrict(dir: MoveDirection, restrict: RelativeDescription) extends Augment
 case class StateDef(name: String) extends Augment
-case class newState(newState: State) extends Augment
+case class MoveState(newState: String) extends Augment
 
 
 
