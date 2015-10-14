@@ -9,10 +9,10 @@ import picoPrecious.ir._
 package object semantics {
     class TooManySurroundingsException(message: String) extends Exception
   
-    def eval(rules: List[RuleBuilder]): List[Rule] = 
-     rules.map { x => evaluateRule(x) }
+    def convertToRules(rules: List[RuleBuilder]): List[Rule] = 
+     rules.map { x => convertRuleBuilder(x) }
     
-    def evaluateRule(rule: RuleBuilder): Rule = {
+    def convertRuleBuilder(rule: RuleBuilder): Rule = {
       var northContents: RelativeDescription = Anything
       var eastContents: RelativeDescription = Anything
       var westContents: RelativeDescription = Anything

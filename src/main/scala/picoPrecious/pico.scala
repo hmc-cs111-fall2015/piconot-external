@@ -4,7 +4,7 @@ import scalafx.application.JFXApp
 import picolib.maze.Maze
 import java.io.File
 import picoPrecious.parser._
-import picoPrecious.semantics.eval
+import picoPrecious.semantics.convertToRules
 import picolib.semantics._
 
 /**
@@ -25,8 +25,9 @@ object pico extends JFXApp {
     program match {
       case e: PicoParser.NoSuccess => println(e) 
       
-      case PicoParser.Success(t, _) => {
-         object GollumBot extends Picobot(maze, eval(t))
+      case PicoParser.Success(ruleBuilders, _) => {
+         // error_check(ruleBuilders)
+         object GollumBot extends Picobot(maze, convertToRules(ruleBuilders))
          with TextDisplay with GUIDisplay
 
         stage = GollumBot.mainStage
