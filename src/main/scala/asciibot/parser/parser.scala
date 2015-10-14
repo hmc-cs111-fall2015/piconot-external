@@ -6,9 +6,10 @@ import scala.collection.mutable.MutableList
 import picolib.maze.Maze
 import picolib.semantics._
 
-case class BlockError(m: String, sc: Int, ec: Int, line: Int) extends RuntimeException
-case class LineError(m: String, line: Int) extends RuntimeException
-case class FileError(m: String) extends RuntimeException
+class AsciibotError() extends RuntimeException
+case class BlockError(m: String, sc: Int, ec: Int, line: Int) extends AsciibotError
+case class LineError(m: String, line: Int) extends AsciibotError
+case class FileError(m: String) extends AsciibotError
 
 object AsciibotParser {
 
