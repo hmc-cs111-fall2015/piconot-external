@@ -7,6 +7,8 @@ import picoPrecious.ir._
  * @author Zoab
  */
 package object semantics {
+    class TooManySurroundingsException(message: String) extends Exception
+  
     def eval(rules: List[RuleBuilder]): List[Rule] = 
      rules.map { x => evaluateRule(x) }
     
@@ -22,6 +24,9 @@ package object semantics {
           case a if a.dir == West => westContents = a.contents
           case a if a.dir == South => southContents = a.contents
         }
+      }
+      if (rule.surroundings.directions.size > 4) {
+        throw new TooManySurroundingsException("You can't specify more than 4 surroundings states!")
       }
       rule.surroundings.directions.map(buildDirection)
       Rule(rule.initialState, Surroundings(northContents,eastContents,westContents,southContents),
