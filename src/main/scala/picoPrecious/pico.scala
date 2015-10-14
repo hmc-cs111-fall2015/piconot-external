@@ -5,6 +5,7 @@ import picolib.maze.Maze
 import java.io.File
 import picoPrecious.parser._
 import picoPrecious.semantics.convertToRules
+import picoPrecious.semantics.ErrorChecker._
 import picolib.semantics._
 
 /**
@@ -26,7 +27,7 @@ object pico extends JFXApp {
       case e: PicoParser.NoSuccess => println(e) 
       
       case PicoParser.Success(ruleBuilders, _) => {
-         // error_check(ruleBuilders)
+         error_check(ruleBuilders)
          object GollumBot extends Picobot(maze, convertToRules(ruleBuilders))
          with TextDisplay with GUIDisplay
 

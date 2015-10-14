@@ -5,18 +5,16 @@ import org.scalacheck._
 import org.scalacheck.Prop.{forAll,BooleanOperators,throws}
 import Gen._
 import Arbitrary.arbitrary
-
 import java.lang.{ IllegalArgumentException => IAE }
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 import org.scalatest.Assertions._
-
 import picoPrecious.ir._
 import picoPrecious.ir.sugar._
 import picoPrecious.semantics._
-
 import picolib.semantics._
+import picoPrecious.semantics.ErrorChecker._
 
 object PicoInterpreterSpec extends Properties("Interpreter") {
   
@@ -79,7 +77,7 @@ class SemanticsTest extends Specification {
     "have at least one object" in {   
       val badSurroundings = SurroundingSetter(List())
       val rb = new RuleBuilder(state1, badSurroundings, North, state1)
-      intercept[NotEnoughSurroundingsException] {
+      intercept[NoSurroundingsException] {
         convertRuleBuilder(rb)
       }
     }
@@ -87,7 +85,7 @@ class SemanticsTest extends Specification {
     "have at least one non-wildcard" in {
       val badSurroundings = SurroundingSetter(List(north, east2, west, south))
       val rb = new RuleBuilder(state1, badSurroundings, North, state1)
-      intercept[NotEnoughSurroundingsException] {
+      intercept[NoSurroundingsException] {
         convertRuleBuilder(rb)
       }
     }
