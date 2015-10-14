@@ -1,0 +1,8 @@
+state Start
+   Nopen -> go North
+   Nclosed, Eopen -> go East
+   Any -> turn West transition Sweep
+
+state Sweep
+   Fopen -> go Forward
+   Any -> go South turn Back
