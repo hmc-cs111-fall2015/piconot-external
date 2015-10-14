@@ -14,7 +14,8 @@ sealed abstract class Transformers extends AST
 sealed abstract class MultiTransformers extends AST
 sealed abstract class Augment extends AST
 
-case class ElseTransformer(transL: Transformer, transR: Transformers) extends Transformer
+case class ElseTransformerBasic(move: Move, transR: Transformers) extends Transformer
+case class ElseTransformerComplex(move: Move, transL: Transformers, transR: Transformers) extends Transformer
 case class AugmentTransformer(aug: Augment, trans: Transformers) extends Transformer
 case class BaseTransformer(aug: Augment) extends Transformer
 
