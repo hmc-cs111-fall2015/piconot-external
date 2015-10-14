@@ -11,6 +11,7 @@ package object ErrorChecker {
     class NoSurroundingsException(message: String) extends Exception
     class AllWildcardsException(message: String) extends Exception
     class DuplicateSurroundingsException(message: String) extends Exception
+    class InvalidMoveDirectionException(message: String) extends Exception
   
     def error_check(rules : List[RuleBuilder]): Unit = {
       rules.foreach { x => checkOneRule(x) }
@@ -20,6 +21,7 @@ package object ErrorChecker {
       checkNumSurroundings(rule)
       checkNotAllWildcards(rule)
       checkNoDuplicateSurroundings(rule)
+      checkDirToMoveNotBlocked(rule)
     }
     
     def checkNotAllWildcards(rule: RuleBuilder): Unit = {
@@ -52,5 +54,13 @@ package object ErrorChecker {
       if (northCount > 1 || eastCount > 1 || westCount > 1 || southCount > 1) {
         throw new DuplicateSurroundingsException("You specified a surrounding more than once!")
       }
+    }
+    
+    def checkDirToMoveNotBlocked(rule: RuleBuilder): Unit = {
+       val moveDir: MoveDirection = rule.direction
+       if (moveDir != StayHere) {
+         rule.surroundings.directions.foreach { x => if (x.dir == moveDir && x.contents == Blocked) 
+           throw new InvalidMoveDirectionException("You're trying to move in a direction that's blocked!") }    
+       }      
     }
 }
