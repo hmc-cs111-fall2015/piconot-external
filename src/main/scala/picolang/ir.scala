@@ -1,10 +1,19 @@
-package piconot.language
+package picolang.ir
 
 import scala.language.postfixOps
 
 /**
  * @author dhouck apinson
  */
+
+object typeAliases {
+  /** The name of a state */
+  type Name = String
+  /** The abstract syntax tree for our language */
+  type AST = Seq[State]
+}
+
+import typeAliases._
 
 // We couldn’t get Enumeration to work
 /** Relative and cardinal directions used for actions and facing */
@@ -43,17 +52,17 @@ case object Right extends Direction(false) {
 }
 
 /** Actions are things the picobot can do from a given state */
-private[language] abstract sealed class Action
-private[language] case class Go(direction: Direction) extends Action {
+abstract sealed class Action
+case class Go(direction: Direction) extends Action {
   override def toString: String = "go " + (direction toString)
 }
-private[language] case class Turn(direction: Direction) extends Action {
+case class Turn(direction: Direction) extends Action {
   override def toString: String = "turn " + (direction toString)
 }
 
 /** A rule gives the picobot instructions on what to do 
  *  given certain surroundings */
-private[language] class Rule(val surroundings: Map[Direction, Boolean], val actions: Seq[Action],
+class Rule(val surroundings: Map[Direction, Boolean], val actions: Seq[Action],
     val transition: Option[Name]) {
   override def toString: String = {
     val surroundingString = surroundings map {
@@ -69,7 +78,7 @@ private[language] class Rule(val surroundings: Map[Direction, Boolean], val acti
 }
 
 /** States are collections of rules for various surroundings */
-private[language] class State(val name: Name, val rules: List[Rule]) {
+class State(val name: Name, val rules: List[Rule]) {
   override def toString: String = {
     "State \"" + name + "\"\n\t" + ((rules reverse) mkString "\n\t") + "\n"
   }
