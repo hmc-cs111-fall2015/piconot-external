@@ -1,6 +1,6 @@
 package picoPrecious
 
-import picolib.semantics._
+import picolib.semantics.{RelativeDescription, Rule, North, East, West, South, Anything, Surroundings}
 import picoPrecious.ir._
 
 /**
