@@ -7,11 +7,6 @@ import picolib.semantics._
  * @author Zoab
  */
 package object ErrorChecker {
-    class TooManySurroundingsException(message: String) extends Exception
-    class NoSurroundingsException(message: String) extends Exception
-    class AllWildcardsException(message: String) extends Exception
-    class DuplicateSurroundingsException(message: String) extends Exception
-    class InvalidMoveDirectionException(message: String) extends Exception
   
     def error_check(rules : List[RuleBuilder]): Unit = {
       rules.foreach { x => checkOneRule(x) }
@@ -26,7 +21,7 @@ package object ErrorChecker {
     
     def checkNotAllWildcards(rule: RuleBuilder): Unit = {
       var foundNonWildcard: Boolean = false
-      rule.surroundings.directions.foreach { x => if (x.contents != Anything) foundNonWildcard = true }
+      rule.surroundings.directions.foreach { x => foundNonWildcard = foundNonWildcard || x.contents != Anything }
       if (!foundNonWildcard) {
         throw new AllWildcardsException("Can't have a rule with no non-wildcards!")
       }

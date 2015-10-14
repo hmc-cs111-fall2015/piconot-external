@@ -7,8 +7,13 @@ import picoPrecious.ir._
  * @author Zoab
  */
 package object semantics {
+    // We wanted these in ErrorChecker.scala, but encountered strange errors when we did that.
     class TooManySurroundingsException(message: String) extends Exception
-  
+    class NoSurroundingsException(message: String) extends Exception
+    class AllWildcardsException(message: String) extends Exception
+    class DuplicateSurroundingsException(message: String) extends Exception
+    class InvalidMoveDirectionException(message: String) extends Exception
+    
     def convertToRules(rules: List[RuleBuilder]): List[Rule] = 
      rules.map { x => convertRuleBuilder(x) }
     
@@ -25,9 +30,7 @@ package object semantics {
           case a if a.dir == South => southContents = a.contents
         }
       }
-      if (rule.surroundings.directions.size > 4) {
-        throw new TooManySurroundingsException("You can't specify more than 4 surroundings states!")
-      }
+
       rule.surroundings.directions.map(buildDirection)
       Rule(rule.initialState, Surroundings(northContents,eastContents,westContents,southContents),
           rule.direction, if (rule.finalState == null) rule.initialState else rule.finalState)

@@ -13,8 +13,8 @@ import org.scalatest.Assertions._
 import picoPrecious.ir._
 import picoPrecious.ir.sugar._
 import picoPrecious.semantics._
-import picolib.semantics._
 import picoPrecious.semantics.ErrorChecker._
+import picolib.semantics._
 
 object PicoInterpreterSpec extends Properties("Interpreter") {
   
@@ -52,42 +52,42 @@ object PicoInterpreterSpec extends Properties("Interpreter") {
 
 @RunWith(classOf[JUnitRunner])
 class SemanticsTest extends Specification {
-  val north = DirectionAndContents(Anything, North)
+  val north = DirectionAndContents(Blocked, North)
+  val north2 = DirectionAndContents(Anything, North)
   val east = DirectionAndContents(Blocked, East)
   val east2 = DirectionAndContents(Anything, East)
   val west = DirectionAndContents(Anything, West)
   val south = DirectionAndContents(Anything, South)
-  val north2 = DirectionAndContents(Anything, North)
   
   val state1 = State("1")
   
   "SurroundingSetters" should {
     "have no more than four objects" in {      
       val badSurroundings = SurroundingSetter(List(north, east, west, south, north2))
-      val goodSurroundings = SurroundingSetter(List(north, east, west, south))
       val rb1 = new RuleBuilder(state1, badSurroundings, North, state1)
       intercept[TooManySurroundingsException] {
-        convertRuleBuilder(rb1)
+        checkOneRule(rb1)
       }
-
-      val rb2 = new RuleBuilder(state1, goodSurroundings, North, state1)
-      convertRuleBuilder(rb2) === Rule(state1, Surroundings(Anything, Blocked, Anything, Anything), North, state1)
+      
+      true
     }    
     
     "have at least one object" in {   
       val badSurroundings = SurroundingSetter(List())
       val rb = new RuleBuilder(state1, badSurroundings, North, state1)
       intercept[NoSurroundingsException] {
-        convertRuleBuilder(rb)
+        checkOneRule(rb)
       }
+      true
     }
     
     "have at least one non-wildcard" in {
-      val badSurroundings = SurroundingSetter(List(north, east2, west, south))
+      val badSurroundings = SurroundingSetter(List(north2, east2, west, south))
       val rb = new RuleBuilder(state1, badSurroundings, North, state1)
-      intercept[NoSurroundingsException] {
-        convertRuleBuilder(rb)
+      intercept[AllWildcardsException] {
+        checkOneRule(rb)
       }
+      true
     }
     
     "have no duplicates" in {
@@ -95,13 +95,35 @@ class SemanticsTest extends Specification {
       val badSurroundings2 = SurroundingSetter(List(north, north2))
       val rb1 = new RuleBuilder(state1, badSurroundings1, North, state1)
       intercept[DuplicateSurroundingsException] {
-        convertRuleBuilder(rb1)
+        checkOneRule(rb1)
       }
       
       val rb2 = new RuleBuilder(state1, badSurroundings2, North, state1)
       intercept[DuplicateSurroundingsException] {
-        convertRuleBuilder(rb2)
+        checkOneRule(rb2)
       }
+      true
+    }
+    
+    "not have a StayHere" in {
+      val badSurroundings = SurroundingSetter(List(new DirectionAndContents(Blocked, StayHere)))
+      intercept[IAE] {
+        checkOneRule(new RuleBuilder(state1, badSurroundings, North, state1))
+      }
+      true
+    }
+    
+  }
+  
+  "RuleBuilder" should {
+    "not make a rule that moves in a blocked direction" in {
+       val surroundings = SurroundingSetter(List(east))
+       val rb = new RuleBuilder(state1, surroundings, East, state1)
+       intercept[InvalidMoveDirectionException] {
+         checkOneRule(rb)
+       }
+       
+       true
     }
   }
 

@@ -3,12 +3,21 @@ package picoPrecious.parser
 import scala.util.parsing.combinator._
 import picoPrecious.ir._
 import picoPrecious.ir.sugar._
+import picoPrecious.semantics.ErrorChecker._
 import picolib.semantics._
 
 /**
  * @author Zoab
  */
+    
+abstract class GrammarException(msg: String) extends Exception
+case class DefiniteArticleException(name: String, needsArticle: Boolean = true) extends 
+  GrammarException(s"<The> $name ${if (needsArticle) "needs" else "doesn't need"} a definite article.")
+case class ProperNounException(name: String) extends 
+  GrammarException(s"$name is a proper noun and should be capitalized.")
+  
 object PicoParser extends JavaTokenParsers with PackratParsers {
+  
   def apply(s: String): ParseResult[List[RuleBuilder]] = parseAll(program,s)
   
   def program: Parser[List[RuleBuilder]] = expr*
@@ -30,7 +39,33 @@ object PicoParser extends JavaTokenParsers with PackratParsers {
       "then go towards the Lonely Mountain" ^^ {case "then go towards the Lonely Mountain" => East} |
       "then go towards the Undying Lands" ^^ {case "then go towards the Undying Lands" => West} |
       "then go towards Mordor" ^^ {case "then go towards Mordor" => South} |
-      "then stay" ^^ {case "then stay" => StayHere})
+      "then stay" ^^ {case "then stay" => StayHere} |
+      
+      // Error states
+      "then go towards Shire" ^^ {case "then go towards Shire" => throw new DefiniteArticleException("Shire") } |
+      "then go towards shire" ^^ {case "then go towards shire" => throw new DefiniteArticleException("Shire") } |
+      "then go towards the shire" ^^ {case "then go towards the shire" => throw new ProperNounException("Shire") } |
+      
+      "then go towards Lonely Mountain" ^^ {case "then go towards Lonely Mountain" => throw new DefiniteArticleException("Lonely Mountain") } |
+      "then go towards lonely Mountain" ^^ {case "then go towards lonely Mountain" => throw new DefiniteArticleException("Lonely Mountain") } |
+      "then go towards Lonely mountain" ^^ {case "then go towards Lonely mountain" => throw new DefiniteArticleException("Lonely Mountain") } |
+      "then go towards lonely mountain" ^^ {case "then go towards lonely mountain" => throw new DefiniteArticleException("Lonely Mountain") } |
+      "then go towards the lonely Mountain" ^^ {case "then go towards the lonely Mountain" => throw new ProperNounException("Lonely Mountain") } |
+      "then go towards the Lonely mountain" ^^ {case "then go towards the Lonely mountain" => throw new ProperNounException("Lonely Mountain") } |
+      "then go towards the lonely mountain" ^^ {case "then go towards the lonely mountain" => throw new ProperNounException("Lonely Mountain") } |
+      
+      "then go towards Undying Lands" ^^ {case "then go towards Undying Lands" => throw new DefiniteArticleException("Undying Lands") } |
+      "then go towards undying Lands" ^^ {case "then go towards undying Lands" => throw new DefiniteArticleException("Undying Lands") } |
+      "then go towards Undying lands" ^^ {case "then go towards Undying lands" => throw new DefiniteArticleException("Undying Lands") } |
+      "then go towards undying lands" ^^ {case "then go towards undying lands" => throw new DefiniteArticleException("Undying Lands") } |
+      "then go towards the undying Lands" ^^ {case "then go towards the undying Lands" => throw new ProperNounException("Undying Lands") } |
+      "then go towards the Undying lands" ^^ {case "then go towards the Undying lands" => throw new ProperNounException("Undying Lands") } |
+      "then go towards the undying lands" ^^ {case "then go towards the undying lands" => throw new ProperNounException("Undying Lands") } |
+      
+      "then go towards the Mordor" ^^ {case "then go towards the Mordor" => throw new DefiniteArticleException("Mordor", false) } |
+      "then go towards the mordor" ^^ {case "then go towards the mordor" => throw new DefiniteArticleException("Mordor", false) } |
+      "then go towards mordor" ^^ {case "then go towards mordor" => throw new ProperNounException("Mordor") } 
+    )
       
   lazy val finalState: PackratParser[State] = 
      ( "and ready weapon "~weapon ^^ {case "and ready weapon "~w => w } |
