@@ -76,7 +76,7 @@ private object semantics {
     surrToPicolibSurr(rule.surroundings, facing) match {
       case None => List()
       case Some(surroundings) => 
-        val (actions, Turn(finalDir)) = cardinalizeActions(rule.actions.toList.reverse, facing)
+        val (actions, Turn(finalDir)) = cardinalizeActions(rule.actions.toList, facing)
         val endState = toStateName(rule.transition getOrElse(stateName), finalDir)
         val dirsToGo = actions map {case Go(dir) => dirToPicolibDir(dir)}
         dirsToGo match {
@@ -98,8 +98,8 @@ private object semantics {
   
   /** Converts an AST to a list of picolib rules */
   def toRule(ast: AST): List[lib.Rule] = {
-    (ast.reverse flatMap {state =>
-      state.rules.reverse flatMap {(rule: Rule) =>
+    (ast flatMap {state =>
+      state.rules flatMap {(rule: Rule) =>
         List(North, East, South, West) flatMap {dir =>
           ruleToPicolibRules(rule, state.name, dir)
         }

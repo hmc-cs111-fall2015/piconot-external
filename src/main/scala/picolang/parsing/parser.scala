@@ -59,10 +59,7 @@ object parser extends JavaTokenParsers with PackratParsers{
    */
   lazy val surroundings: PackratParser[Map[Direction, Boolean]] = log( // TODO: error handling for consistency (no Nopen, Nclosed)
       rep1sep(surrounding, ",".?) ^^ {_.toMap}
-      | "Any" ^^^ Map[Direction, Boolean](North -> true, 
-                                          East -> true,
-                                          West -> true,
-                                          South -> true)
+      | "Any" ^^^ Map[Direction, Boolean]()
       )("surroundings")
     
 
