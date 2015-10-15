@@ -7,8 +7,10 @@
 * We have a working version with elses... have to use semi-colons to separate each of the states. Trying to remove those, might be harder than we think.
 * The semi-colons are gone.
 * We were using the text to test our code and now we found out that our set up was incorrect for using JFXApp and the GUIDisplay.
-*Fixed the GUIDisplay :-)
-
+* Fixed the GUIDisplay :-)
+* Added some functionality to enable change the maze
+* We ran into a strange git divergance and took a while to fix that!!
+* Trying to create a prompt for the user to allow them to change the file that is read into the interpreter
 
 ## Required Questions
 ### On a scale of 1–10 (where 10 is "a lot"), how much did
