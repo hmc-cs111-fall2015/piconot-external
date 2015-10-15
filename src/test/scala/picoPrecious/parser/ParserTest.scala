@@ -145,7 +145,138 @@ class ParserTest extends Specification {
       
       true
     }
+  
+    "have proper capitalization of the Shire when indicating the contents of a location" in {
+      val s = "If you are holding weapon 1 and there is nothing towards the shire, then go towards the Shire."      
+      intercept[ProperNounException] {
+        PicoParser(s)
+      }      
+      
+      true
+    }
     
-  }
+    "have proper capitalization of the Lonely Mountain when indicating the contents of a location" in {
+      val s1 = "If you are holding weapon 1 and there is nothing towards the lonely Mountain, then go towards the Lonely Mountain."      
+      intercept[ProperNounException] {                                       
+        PicoParser(s1)                                                       
+      }                                                                      
+                                                                             
+      val s2 = "If you are holding weapon 1 and there is nothing towards the Lonely mountain, then go towards the Lonely Mountain."      
+      intercept[ProperNounException] {                                       
+        PicoParser(s2)                                                       
+      }                                                                      
+                                                                             
+      val s3 = "If you are holding weapon 1 and there is nothing towards the lonely mountain, then go towards the Lonely Mountain."      
+      intercept[ProperNounException] {
+        PicoParser(s3)
+      }      
 
+      true
+    }
+    
+    
+    "have proper capitalization of the Undying Lands when indicating the contents of a location" in {
+      val s1 = "If you are holding weapon 1 and there is nothing towards the undying lands, then go towards the Undying Lands."      
+      intercept[ProperNounException] {
+        PicoParser(s1)
+      }      
+
+      val s2 = "If you are holding weapon 1 and there is nothing towards the undying Lands, then go towards the Undying Lands."      
+      intercept[ProperNounException] {
+        PicoParser(s2)
+      }    
+
+      val s3 = "If you are holding weapon 1 and there is nothing towards the Undying lands, then go towards the Undying Lands."      
+      intercept[ProperNounException] {
+        PicoParser(s3)
+      }      
+
+      true
+    }
+    
+    "have proper capitalization of Mordor when indicating the contents of a location" in {
+      val s = "If you are holding weapon 1 and there is nothing towards mordor, then go towards Mordor."      
+      intercept[ProperNounException] {
+        PicoParser(s)
+      }      
+      
+      true
+    }
+    
+    "use definite articles when indicating the contents of a location the Shire" in {
+      val s1 = "If you are holding weapon 1 and there is nothing towards Shire, then go towards the Shire."      
+      intercept[DefiniteArticleException] {
+        PicoParser(s1)
+      }      
+      
+      val s2 = "If you are holding weapon 1 and there is nothing towards shire, then go towards the Shire."      
+      intercept[DefiniteArticleException] {
+        PicoParser(s2)
+      }      
+      
+      true
+    }
+    
+    "not use definite articles when indicating the contents of a location Mordor" in {
+      val s1 = "If you are holding weapon 1 and there is nothing towards the Mordor, then go towards Mordor."      
+      intercept[DefiniteArticleException] {
+        PicoParser(s1)
+      }      
+      
+      val s2 = "If you are holding weapon 1 and there is nothing towards the mordor, then go towards Mordor."      
+      intercept[DefiniteArticleException] {
+        PicoParser(s2)
+      }      
+      
+      true
+    }
+    
+    "use definite articles when indicating the contents of a location the Undying Lands" in {
+      val s1 = "If you are holding weapon 1 and there is nothing towards Undying Lands, then go towards the Undying Lands."      
+      intercept[DefiniteArticleException] {                                                                
+        PicoParser(s1)                                                                                     
+      }                                                                                                    
+                                                                                                           
+      val s2 = "If you are holding weapon 1 and there is nothing towards Undying Lands, then go towards the Undying Lands."      
+      intercept[DefiniteArticleException] {                                                                
+        PicoParser(s2)                                                                                     
+      }                                                                                                    
+                                                                                                           
+      val s3 = "If you are holding weapon 1 and there is nothing towards Undying Lands, then go towards the Undying Lands."      
+      intercept[DefiniteArticleException] {
+        PicoParser(s3)
+      }      
+      
+      val s4 = "If you are holding weapon 1 and there is nothing towards Undying Lands, then go towards the Undying Lands."      
+      intercept[DefiniteArticleException] {
+        PicoParser(s4)
+      }   
+      
+      true
+    }
+    
+    "use definite articles when indicating the contents of a location the Lonely Mountain" in {
+      val s1 = "If you are holding weapon 1 and there is nothing towards Lonely Mountain, then go towards the Lonely Mountain."      
+      intercept[DefiniteArticleException] {                                                  
+        PicoParser(s1)                                                                       
+      }                                                                                      
+                                                                                             
+      val s2 = "If you are holding weapon 1 and there is nothing towards lonely Mountain, then go towards the Lonely Mountain."      
+      intercept[DefiniteArticleException] {                                                
+        PicoParser(s2)                                                                     
+      }                                                                                    
+                                                                                           
+      val s3 = "If you are holding weapon 1 and there is nothing towards Lonely mountain, then go towards the Lonely Mountain."      
+      intercept[DefiniteArticleException] {                                                  
+        PicoParser(s3)                                                                       
+      }                                                                                      
+                                                                                             
+      val s4 = "If you are holding weapon 1 and there is nothing towards lonely mountain, then go towards the Lonely Mountain."      
+      intercept[DefiniteArticleException] {
+        PicoParser(s4)
+      }   
+      
+      true
+    }
+  }
 }

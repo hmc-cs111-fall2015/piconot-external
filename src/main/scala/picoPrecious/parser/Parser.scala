@@ -110,8 +110,6 @@ object PicoParser extends JavaTokenParsers with PackratParsers {
          "undying lands" ^^ {case "undying lands" => throw new DefiniteArticleException("Undying Lands")} |
          "Undying lands" ^^ {case "Undying lands" => throw new DefiniteArticleException("Undying Lands")} |
          "Undying Lands" ^^ {case "Undying Lands" => throw new DefiniteArticleException("Undying Lands")} |
-         
-         
                   
          "Mordor" ^^ {case "Mordor" => South} |
          "the Mordor" ^^ {case "the Mordor" => throw new DefiniteArticleException("Mordor", false)} |
