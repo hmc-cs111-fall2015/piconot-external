@@ -8,13 +8,14 @@ import picolib.semantics._
 object PiconotParser extends JavaTokenParsers with PackratParsers {
 
     // parsing interface
-    def apply(s: String): ParseResult[AST] = parseAll(transformer, s)
+    def apply(s: String): ParseResult[AST] = parseAll(multiTransformer, s)
     
     // transformer
     lazy val transformer: PackratParser[Transformer] =
       (  move~"else"~transformers ^^ {case mov~"else"~trans => new ElseTransformerBasic(mov, trans)}  
          | move~transformers~"else"~transformers ^^ {case mov~trans1~"else"~trans2 => new ElseTransformerComplex(mov, trans1, trans2)} 
          | augment~separator~transformers ^^ {case aug~s~trans => new AugmentTransformer(aug, trans)}
+         | augment~"{"~multiTransformer~"}" ^^ {case aug~"{"~mTrans~"}" => new AugmentTransformer(aug, new BracedTransformers(mTrans))}
          | augment ^^ {aug => new BaseTransformer(aug)}
       )
     
@@ -35,18 +36,18 @@ object PiconotParser extends JavaTokenParsers with PackratParsers {
       (  move ^^ { move => move}
          | "stay" ^^ { _ => new Stay()}
          | "state"~ident ^^ {case "state"~s => new StateDef(s)}
+         | dir~restrictdef ^^ {case d~r => new Restrict(d,r)}
          | ident ^^ {case s => new MoveState(s)}
       )
       
     lazy val move: PackratParser[Move] =
-      ( "move"~dir ^^ {case "move"~d => new Move(d)} )
+      ( "move"~dir ^^ {case "move"~d => 
+        println("Move dir:", d)
+        new Move(d)} )
       
     //separator
     lazy val separator: PackratParser[Boolean] = 
-      ( ","    ^^ {_ => true}
-      | "\\w"   ^^ {_ => true}
-      | ":"    ^^ {_ => true}
-      )
+      ( ("," | ":" | "->") ^^ {_ => true})
     
     //newline
     lazy val newline: PackratParser[Boolean] =
