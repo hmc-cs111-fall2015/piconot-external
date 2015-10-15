@@ -1,4 +1,6 @@
-package picolang
+package picolang.semantics
+
+import picolang.ir._
 
 /**
  * @author apinson dhouck
@@ -59,7 +61,7 @@ object semantics {
       : List[lib.Rule] = {
     val currentState = lib.State(statePrefix + stepNumber)
     val nextState =
-      if ((directions length) == 1) end else lib.State(statePrefix + (stepNumber + 1))
+      if ((directions.length) == 1) end else lib.State(statePrefix + (stepNumber + 1))
     val anySurroundings = lib.Surroundings(lib.Anything,lib.Anything,lib.Anything,lib.Anything)
     directions match {
       case Nil => Nil
@@ -96,12 +98,12 @@ object semantics {
   
   /** Converts an AST to a list of picolib rules */
   protected def toRule(ast: AST): List[lib.Rule] = {
-    ast.reverse flatMap {state =>
+    (ast.reverse flatMap {state =>
       state.rules.reverse flatMap {(rule: Rule) =>
         List(North, East, South, West) flatMap {dir =>
           ruleToPicolibRules(rule, state.name, dir)
         }
       }
-    } toList
+    }).toList
   }
 }

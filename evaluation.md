@@ -13,4 +13,6 @@ For rules, we need to find out how to handle multiple actions and one or more tr
 
 We also need to make sure "Nopen" and such are valid and check if the parser will allow for "N open" as it is now. Basically, we need to know how "~" handles whitespace.
 
+We found that "N open" is allowed, and decided to let users use this notation.
 
+Currently, "goNorthtransitionSweep" is allowed, so we need to add whitespace requirements.
