@@ -49,7 +49,6 @@ package object semantics extends interpreter{
                             UndefinedState)
     ast match {
       case BaseTransformer(aug: Augment) => {
-        println("Base augment: ", aug)
         Seq(applyAugment(aug, DefaultRule))
       }
       case AugmentTransformer(aug: Augment, trans: Transformers) =>

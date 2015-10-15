@@ -8,8 +8,7 @@ import picolib.semantics._
 object PiconotParser extends JavaTokenParsers with PackratParsers {
     // parsing interface
     def apply(s: String): ParseResult[AST] = {
-      println(parseAll(multiTransformer, "move up left closed; else move down"))
-      parseAll(multiTransformer, "")
+      parseAll(multiTransformer, s)
     }
     
     def word(s: String): Parser[String] = {
@@ -116,7 +115,6 @@ object PiconotParser extends JavaTokenParsers with PackratParsers {
       
     lazy val move: PackratParser[Move] =
       ( word("move")~dir ^^ {case "move"~d => 
-        println("Move dir:", d)
         new Move(d)} )
       
     //separator
