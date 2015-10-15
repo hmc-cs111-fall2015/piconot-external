@@ -8,6 +8,7 @@ import picolib.semantics._
 object PiconotParser extends JavaTokenParsers with PackratParsers {
     // parsing interface
     def apply(s: String): ParseResult[AST] = {
+      println(parseAll(multiTransformer, "move up ; else stay"))
       parseAll(multiTransformer, s)
     }
     
@@ -15,6 +16,37 @@ object PiconotParser extends JavaTokenParsers with PackratParsers {
     
     
     //lazy val ident2: PackratParser[String] = ident.filter(s => !(reserved contains s))
+    
+    def endsInBlock(trans: Transformers): Boolean = {
+      trans match {
+        case BracedTransformers(_) => true
+        case BaseTransformers(trans) => endsInBlock(trans)
+      }
+      true
+    }
+
+    def endsInBlock(trans: Transformer): Boolean = {
+      trans match {
+        case ElseTransformerBasic(_, t) => endsInBlock(t)
+        case ElseTransformerComplex(_, _, t) => endsInBlock(t)
+        case AugmentTransformer(_, t) => endsInBlock(t)
+        case BaseTransformer(_) => false
+      }
+    }
+    
+    def transformerBlockEnd: PackratParser[Transformer] = new PackratParser[Transformer] {
+      def apply(in: Input): ParseResult[Transformer] = {
+        val parse = transformer(in)
+        parse match {
+          case Success(trans, _) =>  if (endsInBlock(trans)) {
+              parse
+            } else {
+              Failure("You must end rules with either a ; or a {block}. Perhaps you forgot a ;?", in)
+            }
+          case _ => parse
+        }
+      }
+    }
     
     def ident2: PackratParser[String] = new PackratParser[String] {
       def apply(in: Input): ParseResult[String] = {
@@ -33,22 +65,33 @@ object PiconotParser extends JavaTokenParsers with PackratParsers {
     
     // transformer
     lazy val transformer: PackratParser[Transformer] =
-      (  move~word("else")~transformers ^^ {case mov~"else"~trans => new ElseTransformerBasic(mov, trans)}  
-         | move~transformers~word("else")~transformers ^^ {case mov~trans1~"else"~trans2 => new ElseTransformerComplex(mov, trans1, trans2)} 
+      (  move~newline~word("else")~transformers ^^ {case mov~n~"else"~trans => new ElseTransformerBasic(mov, trans)}  
+         | move~transformers~newline~word("else")~transformers ^^ {case mov~trans1~n~"else"~trans2 => new ElseTransformerComplex(mov, trans1, trans2)} 
+         | move~block~word("else")~transformers ^^ {case mov~b~"else"~trans2 => new ElseTransformerComplex(mov, b, trans2)}
          | augment~separator~transformers ^^ {case aug~s~trans => new AugmentTransformer(aug, trans)}
-         | augment~"{"~multiTransformer~"}" ^^ {case aug~"{"~mTrans~"}" => new AugmentTransformer(aug, new BracedTransformers(mTrans))}
+         | augment~block ^^ {case aug~b => new AugmentTransformer(aug, b)}
          | augment ^^ {aug => new BaseTransformer(aug)}
       )
     
+    lazy val augmentList: PackratParser[List[Augment]] =
+      ( augment~separator~augmentList ^^ {case a~s~as => a::as}
+      | augment ^^ {a => List(a)}
+      )
+
+      
     //transformers
     lazy val transformers: PackratParser[Transformers] = 
       ( transformer ^^ {trans => new BaseTransformers(trans)}
-      | "{"~multiTransformer~"}" ^^ {case "{"~mTrans~"}" => new BracedTransformers(mTrans)}
+      | block
       )
+     
+    lazy val block: PackratParser[Transformers] =
+      "{"~multiTransformer~("}".withFailureMessage("You must end rules with either a semicolon ; or a curly-braced surrounded block { ... }. Perhaps on the line above you forgot a ; or to close a block?")) ^^ {case "{"~mTrans~"}" => new BracedTransformers(mTrans)}
     
     //multiTransformer
     lazy val multiTransformer: PackratParser[MultiTransformers] =
       ( transformer~newline~multiTransformer ^^ {case trans~nL~mTrans => new MutlipleMultiTransformers(trans, mTrans)}
+      | transformerBlockEnd~multiTransformer ^^ {case trans~mTrans => new MutlipleMultiTransformers(trans, mTrans)}
       | transformer ^^ {trans => new SingleMultiTransformers(trans)}
       )
     
