@@ -11,20 +11,21 @@ import scalafx.application.JFXApp
 
 import picolib.maze.Maze
 
-
-package object semantics extends JFXApp {
-  
+class interpreter extends JFXApp {
   def picobot(mazename: String)(rs: Seq[Rule]*): List[Rule] = {
     val rules = rs.flatten.toList
     
     val maze = Maze("resources" + File.separator + s"${mazename}.txt")
     object RuleBot extends Picobot(maze, rules)
-      with TextDisplay //with GUIDisplay
+      with TextDisplay with GUIDisplay
     RuleBot.run()
-    //stage = RuleBot.mainStage
+    stage = RuleBot.mainStage
     
     rules
   }
+}
+
+package object semantics extends interpreter{
   
   //case class UndefSurr() extends RelativeDescription('!')
   
