@@ -1,0 +1,20 @@
+// Implementation example for empty picobot maze
+
+state leftTraverse {
+	move left;
+	else stay, downTraverse
+}
+
+state downTraverse {
+	move down;
+	else stay, upTraverse
+}
+
+state upTraverse {
+	move up;
+	else stay, downTraverse
+}
+
+state rightOne {
+	move right, downTraverse
+}
