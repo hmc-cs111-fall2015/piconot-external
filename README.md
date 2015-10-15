@@ -18,20 +18,20 @@ combinators and with the language architecture and implementation process we
 discussed in class.
 
 ## Checklist
- - [ ] [Sign up for teams][Teams]. One team will have three people; all other 
+ - [X] [Sign up for teams][Teams]. One team will have three people; all other 
     teams will have two people
- - [ ] Describe your design in `design.md` 
- - [ ] Before you implement the syntax, write the "empty room" program in
+ - [X] Describe your design in `design.md` 
+ - [X] Before you implement the syntax, write the "empty room" program in
      `example-ideal.txt`
-- [ ] Implement the syntax
-     - [ ] Add files, as needed, to implement your syntax. Use the language
+- [X] Implement the syntax
+     - [X] Add files, as needed, to implement your syntax. Use the language
      architecture we discussed in class (more details below), and use parser
      combinators to implement your parser.
      - Include at least two example programs
-        - [ ] `Empty.bot`
-        - [ ] `RightHand.bot`
-     - [ ] Provide instructions for how to run piconot on a file in `build.md`
-     - [ ] Describe your implementation process in `evaluation.md`
+        - [X] `Empty.bot`
+        - [X] `RightHand.bot`
+     - [X] Provide instructions for how to run piconot on a file in `build.md`
+     - [X] Describe your implementation process in `evaluation.md`
   - [ ] Critique another team's design and implementation
 
 ## Design description and example program
