@@ -27,10 +27,10 @@ class interpreter extends JFXApp {
 
 package object semantics extends interpreter{
   
-  def eval(ast: AST): List[Rule] = {
+  def eval(ast: AST)(mazeName: String): List[Rule] = {
     val rules = evalTransformers(ast)
     println(rules)
-    picobot("empty")(rules)
+    picobot(mazeName)(rules)
   }
   
   def evalTransformers(ast: AST): Seq[Rule] = {

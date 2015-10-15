@@ -21,13 +21,15 @@ object MazeExample extends interpreter {
 //      case e: PiconotParser.NoSuccess ⇒ println(e)
 //    }
 //  }
-    print("start")
     val lines = scala.io.Source.fromFile("resources" + File.separator + s"maze2.txt").mkString
-    val parse = PiconotParser(lines)
-    PiconotParser(lines) match {
+    val firstLineEnd = lines.indexOf("\n")
+    println(firstLineEnd, firstLineEnd)
+    val mazeName = lines.slice(0, firstLineEnd).trim
+    val newLine = lines.slice(firstLineEnd, lines.length())
+    PiconotParser(newLine) match {
       case PiconotParser.Success(t, _) ⇒ {
         println(t)
-        eval(t)
+        eval(t)(mazeName)
       }
       case e: PiconotParser.NoSuccess  ⇒ println(e)
     }
