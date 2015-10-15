@@ -12,7 +12,7 @@ import picolib.semantics._
     
 abstract class GrammarException(msg: String) extends Exception
 case class DefiniteArticleException(name: String, needsArticle: Boolean = true) extends 
-  GrammarException(s"<The> $name ${if (needsArticle) "needs" else "doesn't need"} a definite article.")
+  GrammarException(s"The $name ${if (needsArticle) "needs" else "doesn't need"} a definite article.")
 case class ProperNounException(name: String) extends 
   GrammarException(s"$name is a proper noun and should be capitalized.")
   
@@ -89,7 +89,32 @@ object PicoParser extends JavaTokenParsers with PackratParsers {
      
    lazy val location: Parser[MoveDirection] =
      (   "the Shire" ^^ {case "the Shire" => North} |
+         "the shire" ^^ {case "the shire" => throw new ProperNounException("Shire")} |
+         "shire" ^^ {case "shire" => throw new DefiniteArticleException("Shire")} |
+         "Shire" ^^ {case "Shire" => throw new DefiniteArticleException("Shire")} |
+         
          "the Lonely Mountain" ^^ {case "the Lonely Mountain" => East} |
+         "the lonely Mountain" ^^ {case "the lonely Mountain" => throw new ProperNounException("Lonely Mountain")} |
+         "the Lonely mountain" ^^ {case "the Lonely mountain" => throw new ProperNounException("Lonely Mountain")} |
+         "the lonely mountain" ^^ {case "the lonely mountain" => throw new ProperNounException("Lonely Mountain")} |
+         "lonely Mountain" ^^ {case "lonely Mountain" => throw new DefiniteArticleException("Lonely Mountain")} |
+         "Lonely mountain" ^^ {case "Lonely mountain" => throw new DefiniteArticleException("Lonely Mountain")} |
+         "lonely mountain" ^^ {case "lonely mountain" => throw new DefiniteArticleException("Lonely Mountain")} |
+         "Lonely Mountain" ^^ {case "Lonely Mountain" => throw new DefiniteArticleException("Lonely Mountain")} |
+         
          "the Undying Lands" ^^ {case "the Undying Lands" => West} |
-         "Mordor" ^^ {case "Mordor" => South} )
+         "the undying Lands" ^^ {case "the undying Lands" => throw new ProperNounException("Undying Lands")} |
+         "the undying lands" ^^ {case "the undying lands" => throw new ProperNounException("Undying Lands")} |
+         "the Undying lands" ^^ {case "the Undying lands" => throw new ProperNounException("Undying Lands")} |
+         "undying Lands" ^^ {case "undying Lands" => throw new DefiniteArticleException("Undying Lands")} |
+         "undying lands" ^^ {case "undying lands" => throw new DefiniteArticleException("Undying Lands")} |
+         "Undying lands" ^^ {case "Undying lands" => throw new DefiniteArticleException("Undying Lands")} |
+         "Undying Lands" ^^ {case "Undying Lands" => throw new DefiniteArticleException("Undying Lands")} |
+         
+         
+                  
+         "Mordor" ^^ {case "Mordor" => South} |
+         "the Mordor" ^^ {case "the Mordor" => throw new DefiniteArticleException("Mordor", false)} |
+         "the mordor" ^^ {case "the mordor" => throw new DefiniteArticleException("Mordor", false)} |
+         "mordor" ^^ {case "mordor" => throw new ProperNounException("Mordor")})
 }
