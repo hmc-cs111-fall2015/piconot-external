@@ -17,8 +17,8 @@ object AsciiBot extends App {
   val rules : List[Rule] = try {
     AsciibotParser.parseLines(Source.fromFile(args(1)).getLines)
   } catch {
-    case BlockError(m, sc, ec, line) =>
-      println(s"Error: lines ${line-1} - ${line+1} chars ${sc+1} - ${ec}: $m")
+    case BlockError(m, sc, ec, sl, el) =>
+      println(s"Error: lines ${sl} - ${el} chars ${sc+1} - ${ec}: $m")
       List()
     case LineError(m,line) =>
       println(s"Error: line ${line+1}: $m")

@@ -30,13 +30,13 @@ class AsciibotParserTest extends FunSuite with Matchers {
 
   test("Input: Missing Top Surrounding") {
     val inStateStrs = List("     ","*bat_","  *  ")
-    an [BlockError] should be thrownBy
+    an [CharBlockError] should be thrownBy
     parseInState(inStateStrs, 0, 5)
   }
 
   test("Input: Missing Middle Surrounding") {
     val inStateStrs = List("  #  "," bat_","  *  ")
-    an [BlockError] should be thrownBy
+    an [CharBlockError] should be thrownBy
     parseInState(inStateStrs, 0, 5)
   }
 }

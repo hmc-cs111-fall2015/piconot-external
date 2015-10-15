@@ -7,7 +7,9 @@ import picolib.maze.Maze
 import picolib.semantics._
 
 class AsciibotError() extends RuntimeException
-case class BlockError(m: String, sc: Int, ec: Int, line: Int) extends AsciibotError
+case class CharBlockError(m: String, sc: Int, ec: Int) extends AsciibotError
+case class BlockError(m: String, startChar: Int, endChar: Int,
+                      startLine: Int, endLine: Int) extends AsciibotError
 case class LineError(m: String, line: Int) extends AsciibotError
 case class FileError(m: String) extends AsciibotError
 
@@ -27,7 +29,7 @@ object AsciibotParser {
           try {
             rules ++= parseLine(lines)
           } catch {
-            case BlockError(m, sc, ec, _) => throw new BlockError(m, sc, ec, lineNum)
+            case CharBlockError(m, sc, ec) => throw new BlockError(m, sc, ec, lineNum-1, lineNum+1)
           }
           lines.clear
         }
@@ -56,7 +58,7 @@ object AsciibotParser {
       val numBars = (nlns map (l => l(i)) filter (_=='|')).length
       if (!(numBars == 0 || numBars == 3)) {
         //throw new RuleSeparatorError(i)
-        throw new BlockError("Vertical bar unexpected", i,i+1, 0)
+        throw new CharBlockError("Unaligned vertical bars", i,i+1)
       }
       if (numBars == 3) {
         rules += parseRule(nlns, ruleStart, i)
@@ -69,7 +71,7 @@ object AsciibotParser {
   }
 
   def parseRule(lines: Seq[String], start: Int, end: Int) : Rule = {
-    def throwBE(m : String) = throw new BlockError(m, start, end, 0)
+    def throwBE(m : String) = throw new CharBlockError(m, start, end)
     val arrowStart = lines(1).indexOfSlice("->", start)
     if (arrowStart < start || arrowStart >= end) {
       throwBE("No arrow found")
@@ -94,13 +96,13 @@ object AsciibotParser {
   }
 
   def parseInState(a: Seq[String], start: Int, end: Int) : (Surroundings, State) = {
-    def throwBE(m : String) = throw new BlockError(m, start, end, 0)
+    def throwBE(m : String) = throw new CharBlockError(m, start, end)
     assert(a.length == 3)
     val state_str = a(1).slice(start+1,end-1)
     // Check to make sure there are no illegal characters in the state name
     if ("#*_|-/> " exists (state_str contains _)) {
       //throw new StateNameError(state_str)
-      throw new BlockError(s"Bad state name `$state_str'", start, end, 0)
+      throw new CharBlockError(s"Bad state name `$state_str'", start, end)
     }
 
     if (   a(0)(start) != ' '
@@ -122,7 +124,7 @@ object AsciibotParser {
         case (_, "#") => Blocked
         case (_, "_") => Open
         case (_, "*") => Anything
-        case (dir, s) => throw new BlockError(s"Invalid Surrounding `$s' for $dir side", start, end, 0)
+        case (dir, s) => throw new CharBlockError(s"Invalid Surrounding `$s' for $dir side", start, end)
       })
 
     (Surroundings(surrs(0), surrs(1), surrs(2), surrs(3)), State(state_str))
@@ -132,7 +134,7 @@ object AsciibotParser {
                     start: Int,
                     end: Int,
                     surrs: Surroundings) : (MoveDirection, State) = {
-    def throwBE(m : String) = throw new BlockError(m, start, end, 0)
+    def throwBE(m : String) = throw new CharBlockError(m, start, end)
   
     //println(s"parseOutState: $a")
     assert(a.length == 3)
