@@ -41,6 +41,8 @@ package object semantics {
     case SingleMultiTransformers(t: Transformer) => evalTransformers(t)
     case MutlipleMultiTransformers(transL, multiT) => 
       evalTransformers(transL) ++ evalTransformers(multiT)
+    case _ => Seq()
+    
   }
   
   def applyAugment(aug: Augment, rule: Rule): Rule = aug match {
