@@ -1,0 +1,8 @@
+**Example Program in JRPicobot
+0 Wo -> W
+0 Wx So -> S
+0 Wx Sx -> E 1
+1 Eo -> E
+1 Ex -> N 2
+2 Wo -> W 2
+2 Wx -> N 1
