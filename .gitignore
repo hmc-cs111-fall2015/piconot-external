@@ -3,4 +3,5 @@ target
 .project
 .settings
 .cache-main
+*.class
 /bin/

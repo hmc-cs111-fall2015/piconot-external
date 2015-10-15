@@ -8,11 +8,18 @@ import picolib.semantics._
 object PiconotParser extends JavaTokenParsers with PackratParsers {
     // parsing interface
     def apply(s: String): ParseResult[AST] = {
-      println(parseAll(multiTransformer, "move up ; else stay"))
       parseAll(multiTransformer, s)
     }
     
-    def word(s: String): Parser[String] = ident.filter(_ == s)
+    def word(s: String): Parser[String] = {
+      val msg = if (s == "else") {
+        "Expected the keyword 'else'."
+      } else {
+        s"Expected the keyword '${s}'."
+      }
+      ident.filter(_ == s).withFailureMessage(msg)
+        
+    }
     
     
     //lazy val ident2: PackratParser[String] = ident.filter(s => !(reserved contains s))
@@ -22,7 +29,6 @@ object PiconotParser extends JavaTokenParsers with PackratParsers {
         case BracedTransformers(_) => true
         case BaseTransformers(trans) => endsInBlock(trans)
       }
-      true
     }
 
     def endsInBlock(trans: Transformer): Boolean = {
@@ -51,7 +57,7 @@ object PiconotParser extends JavaTokenParsers with PackratParsers {
     def ident2: PackratParser[String] = new PackratParser[String] {
       def apply(in: Input): ParseResult[String] = {
         val reserved = "else move up down left right north south east west n s e w open free blocked closed".split(" ")
-        val parse = ident(in)
+        val parse = (ident.withFailureMessage("Expected to see a state name. State names must be valid identifiers (alphanumeric, etc.)"))(in)
         parse match {
           case Success(word, _) => if (reserved contains word) {
               Failure(s"${word} is a reserved word. It cannot be used as a state name.", in)
@@ -66,7 +72,7 @@ object PiconotParser extends JavaTokenParsers with PackratParsers {
     // transformer
     lazy val transformer: PackratParser[Transformer] =
       (  move~newline~word("else")~transformers ^^ {case mov~n~"else"~trans => new ElseTransformerBasic(mov, trans)}  
-         | move~transformers~newline~word("else")~transformers ^^ {case mov~trans1~n~"else"~trans2 => new ElseTransformerComplex(mov, trans1, trans2)} 
+         | move~separator~transformers~newline~word("else")~transformers ^^ {case mov~s~trans1~n~"else"~trans2 => new ElseTransformerComplex(mov, trans1, trans2)} 
          | move~block~word("else")~transformers ^^ {case mov~b~"else"~trans2 => new ElseTransformerComplex(mov, b, trans2)}
          | augment~separator~transformers ^^ {case aug~s~trans => new AugmentTransformer(aug, trans)}
          | augment~block ^^ {case aug~b => new AugmentTransformer(aug, b)}
@@ -86,8 +92,11 @@ object PiconotParser extends JavaTokenParsers with PackratParsers {
       )
      
     lazy val block: PackratParser[Transformers] =
-      "{"~multiTransformer~("}".withFailureMessage("You must end rules with either a semicolon ; or a curly-braced surrounded block { ... }. Perhaps on the line above you forgot a ; or to close a block?")) ^^ {case "{"~mTrans~"}" => new BracedTransformers(mTrans)}
-    
+      (
+       ("{".withFailureMessage("You either forgot a separator (your choice of , : ->), or forgot to start a curly-brace block { ... }! For example, 'move left left closed' is missing a separator between the 'left's."))
+      ~multiTransformer
+      ~("}".withFailureMessage("You must end rules with either a semicolon ; or a curly-braced surrounded block { ... }. Perhaps on the line above you forgot a ; or to close a block?")) ^^ {case "{"~mTrans~"}" => new BracedTransformers(mTrans)}
+     )
     //multiTransformer
     lazy val multiTransformer: PackratParser[MultiTransformers] =
       ( transformer~newline~multiTransformer ^^ {case trans~nL~mTrans => new MutlipleMultiTransformers(trans, mTrans)}
@@ -106,7 +115,6 @@ object PiconotParser extends JavaTokenParsers with PackratParsers {
       
     lazy val move: PackratParser[Move] =
       ( word("move")~dir ^^ {case "move"~d => 
-        println("Move dir:", d)
         new Move(d)} )
       
     //separator
@@ -117,14 +125,14 @@ object PiconotParser extends JavaTokenParsers with PackratParsers {
     lazy val newline: PackratParser[Boolean] =
         ( ";"  ^^ {_ => true}
         //| "\n" ^^ {_ => true}
-        )
+        ).withFailureMessage("Expected and end-of-rule marker. That's either a ; or closing a curly-brace block { ... }.")
      
     //restrictdef
     lazy val restrictdef: PackratParser[RelativeDescription] =
       ( //environment?
        (word("open") | word("free")) ^^ {_ => Open} 
        | (word("blocked") | word("closed")) ^^ {_ => Blocked}
-      )
+      ).withFailureMessage("Expected a surroundings descriptor keyword. (open, free, blocked, closed)")
       
     // dir
     lazy val dir: PackratParser[MoveDirection] =
