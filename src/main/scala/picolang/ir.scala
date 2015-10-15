@@ -6,15 +6,6 @@ import scala.language.postfixOps
  * @author dhouck apinson
  */
 
-object typeAliases {
-  /** The name of a state */
-  type Name = String
-  /** The abstract syntax tree for our language */
-  type AST = Seq[State]
-}
-
-import typeAliases._
-
 // We couldn’t get Enumeration to work
 /** Relative and cardinal directions used for actions and facing */
 abstract sealed class Direction(val absolute: Boolean) {
