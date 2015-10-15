@@ -1,5 +1,5 @@
 state leftCorner {
-    move left {}
+    move left left closed;
     else move north -> topCorner
 }
 

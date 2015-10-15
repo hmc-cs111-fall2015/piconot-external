@@ -26,6 +26,10 @@ package object semantics extends JFXApp {
     rules
   }
   
+  //case class UndefSurr() extends RelativeDescription('!')
+  
+  case class RulesDontMakeSense(msg: String) extends Exception(msg)
+  
   def eval(ast: AST): List[Rule] = {
     val rules = evalTransformers(ast)
     println(rules)
@@ -62,36 +66,52 @@ package object semantics extends JFXApp {
       case ElseTransformerComplex(Move(dir), trans1, trans2) => {
         evalTransformers(AugmentTransformer(Move(dir), trans1)) ++ evalTransformers(AugmentTransformer(Restrict(dir, Blocked), trans2))
       }
-      case _ => Seq()
     }
   }
   
-  def applyAugment(aug: Augment, rule: Rule): Rule = aug match {
-    case Move(dir) => 
-      {
-        val newRule = rule.copy(moveDirection = dir)
-        applyAugment(new Restrict(dir, Open), newRule)
+  def applyAugment(aug: Augment, rule: Rule): Rule = {
+    val UndefinedStateString: String = "!!__ UN DE FI NE D __!!"
+    val UndefState = State(UndefinedStateString)
+    aug match {
+      case Move(dir) => 
+        {
+          val newRule = rule.copy(moveDirection = dir)
+          applyAugment(new Restrict(dir, Open), newRule)
+        }
+      case Stay() => rule.copy(moveDirection = StayHere)
+      case Restrict(dir, relDisc) => 
+        val curDir = dir match {
+          case North => rule.surroundings.north
+          case South => rule.surroundings.south
+          case East => rule.surroundings.east
+          case West => rule.surroundings.west
+        }
+        if (curDir != Anything) {
+          throw RulesDontMakeSense(s"You tried to set the surroundings in the ${dir} direction twice! Specifically, to ${curDir} and ${dir}.")
+        }
+        rule.copy(
+          surroundings = dir match {
+            case North => rule.surroundings.copy(north = relDisc)
+            case South => rule.surroundings.copy(south = relDisc)
+            case East => rule.surroundings.copy(east = relDisc)
+            case West => rule.surroundings.copy(west = relDisc)
+          })
+      case StateDef(stateName: String) => {
+        val newRule = rule.copy(startState = new State(stateName))
+        if (newRule.endState == State(UndefinedStateString)) {
+          newRule.copy(endState = newRule.startState)
+        } else {
+          newRule
+        }
       }
-    case Stay() => rule.copy(moveDirection = StayHere)
-    case Restrict(dir, relDisc) => 
-      rule.copy(
-        surroundings = dir match {
-          case North => rule.surroundings.copy(north = relDisc)
-          case South => rule.surroundings.copy(south = relDisc)
-          case East => rule.surroundings.copy(east = relDisc)
-          case West => rule.surroundings.copy(west = relDisc)
-        })
-    case StateDef(stateName: String) => {
-      val UndefinedStateString: String = "!!__ UN DE FI NE D __!!"
-      val newRule = rule.copy(startState = new State(stateName))
-      if (newRule.endState == State(UndefinedStateString)) {
-        newRule.copy(endState = newRule.startState)
-      } else {
-        newRule
+      case MoveState(stateName: String) => {
+        if (rule.endState != State(UndefinedStateString)) {
+          throw RulesDontMakeSense(s"You set the end state twice! Specifically, to both ${rule.endState} and ${State(stateName)}.")
+        }
+        rule.copy(endState = new State(stateName))
       }
     }
-    case MoveState(stateName: String) => rule.copy(endState = new State(stateName))
-  }
+}
   
   
 }
