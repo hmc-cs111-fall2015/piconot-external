@@ -3,7 +3,7 @@ package piconot.example
 import scala.tools.nsc.EvalLoop
 //import piconot.semantics.eval
 import piconot.semantics.eval
-import piconot.initializer
+import piconot.interpreter
 import piconot.parser._
 import piconot.ir._
 import java.io.File
@@ -12,7 +12,7 @@ import java.io.File
  * @author mvalentine
  */
 
-object MazeExample extends initializer {
+object MazeExample extends interpreter {
 //  override def prompt = "> "
 //
 //  loop { line ⇒

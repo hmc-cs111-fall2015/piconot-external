@@ -11,7 +11,7 @@ import scalafx.application.JFXApp
 
 import picolib.maze.Maze
 
-class initializer extends JFXApp {
+class interpreter extends JFXApp {
   def picobot(mazename: String)(rs: Seq[Rule]*): List[Rule] = {
     val rules = rs.flatten.toList
     
@@ -25,7 +25,7 @@ class initializer extends JFXApp {
   }
 }
 
-package object semantics extends initializer{
+package object semantics extends interpreter{
   
   def eval(ast: AST): List[Rule] = {
     val rules = evalTransformers(ast)
