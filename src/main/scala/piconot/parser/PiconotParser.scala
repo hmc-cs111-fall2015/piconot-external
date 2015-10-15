@@ -6,14 +6,35 @@ import piconot.ir.sugar._
 import picolib.semantics._
 
 object PiconotParser extends JavaTokenParsers with PackratParsers {
-
     // parsing interface
-    def apply(s: String): ParseResult[AST] = parseAll(multiTransformer, s)
+    def apply(s: String): ParseResult[AST] = {
+      parseAll(multiTransformer, s)
+    }
+    
+    def word(s: String): Parser[String] = ident.filter(_ == s)
+    
+    val reserved = "else move up down left right north south east west n s e w open free blocked closed".split(" ")
+    //lazy val ident2: PackratParser[String] = ident.filter(s => !(reserved contains s))
+    
+    def ident2: PackratParser[String] = new PackratParser[String] {
+      def apply(in: Input): ParseResult[String] = {
+        val reserved = List("else")
+        val parse = ident(in)
+        parse match {
+          case Success(word, _) => if (reserved contains word) {
+              Failure(s"${word} is a reserved word. It cannot be used as a state name.", in)
+            } else {
+              parse
+            }
+          case _ => parse
+        }
+      }
+    }
     
     // transformer
     lazy val transformer: PackratParser[Transformer] =
-      (  move~"else"~transformers ^^ {case mov~"else"~trans => new ElseTransformerBasic(mov, trans)}  
-         | move~transformers~"else"~transformers ^^ {case mov~trans1~"else"~trans2 => new ElseTransformerComplex(mov, trans1, trans2)} 
+      (  move~word("else")~transformers ^^ {case mov~word("else")~trans => new ElseTransformerBasic(mov, trans)}  
+         | move~transformers~word("else")~transformers ^^ {case mov~trans1~word("else")~trans2 => new ElseTransformerComplex(mov, trans1, trans2)} 
          | augment~separator~transformers ^^ {case aug~s~trans => new AugmentTransformer(aug, trans)}
          | augment~"{"~multiTransformer~"}" ^^ {case aug~"{"~mTrans~"}" => new AugmentTransformer(aug, new BracedTransformers(mTrans))}
          | augment ^^ {aug => new BaseTransformer(aug)}
@@ -34,14 +55,14 @@ object PiconotParser extends JavaTokenParsers with PackratParsers {
     // augment
     lazy val augment: PackratParser[Augment] =
       (  move ^^ { move => move}
-         | "stay" ^^ { _ => new Stay()}
-         | "state"~ident ^^ {case "state"~s => new StateDef(s)}
+         | word("stay") ^^ { _ => new Stay()}
+         | word("state")~ident2 ^^ {case word("state")~s => new StateDef(s)}
          | dir~restrictdef ^^ {case d~r => new Restrict(d,r)}
-         | ident ^^ {case s => new MoveState(s)}
+         | ident2 ^^ {case s => new MoveState(s)}
       )
       
     lazy val move: PackratParser[Move] =
-      ( "move"~dir ^^ {case "move"~d => 
+      ( word("move")~dir ^^ {case word("move")~d => 
         println("Move dir:", d)
         new Move(d)} )
       
@@ -52,22 +73,22 @@ object PiconotParser extends JavaTokenParsers with PackratParsers {
     //newline
     lazy val newline: PackratParser[Boolean] =
         ( ";"  ^^ {_ => true}
-        | "\n" ^^ {_ => true}
+        //| "\n" ^^ {_ => true}
         )
      
     //restrictdef
     lazy val restrictdef: PackratParser[RelativeDescription] =
       ( //environment?
-       ("open" | "free") ^^ {_ => Open} 
-       | ("blocked" | "closed") ^^ {_ => Blocked}
+       (word("open") | word("free")) ^^ {_ => Open} 
+       | (word("blocked") | word("closed")) ^^ {_ => Blocked}
       )
       
     // dir
     lazy val dir: PackratParser[MoveDirection] =
-      ( ("north" | "n" | "up") ^^ {_ => North}
-        | ("east" | "e" | "right") ^^ {_ => East}
-        | ("south" | "s" | "down") ^^ {_ => South}
-        | ("west" | "w" | "left") ^^ {_ => West} )
+      ( (word("north") | word("n") | word("up")) ^^ {_ => North}
+        | (word("east") | word("e") | word("right")) ^^ {_ => East}
+        | (word("south") | word("s") | word("down")) ^^ {_ => South}
+        | (word("west") | word("w") | word("left")) ^^ {_ => West} )
       
       
 //    // expressions
