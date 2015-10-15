@@ -1,4 +1,4 @@
-package piconot.semantics
+package piconot
 
 /**
  * @author mvalentine
