@@ -32,6 +32,7 @@ def eval(ast: AST)(mazeName: String): List[Rule] = {
     val rules = evalTransformers(ast)
     println(rules)
     picobot(mazeName)(rules)
+    rules.toList
   }
   
   def evalTransformers(ast: AST): Seq[Rule] = {

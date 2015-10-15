@@ -21,7 +21,7 @@ object MazeExample extends interpreter {
 //      case e: PiconotParser.NoSuccess ⇒ println(e)
 //    }
 //  }
-    val lines = scala.io.Source.fromFile("resources" + File.separator + s"maze2.txt").mkString
+    val lines = scala.io.Source.fromFile("resources" + File.separator + s"mazerunner.txt").mkString
     val firstLineEnd = lines.indexOf("\n")
     println(firstLineEnd, firstLineEnd)
     val mazeName = lines.slice(0, firstLineEnd).trim
