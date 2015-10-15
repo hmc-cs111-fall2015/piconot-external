@@ -18,13 +18,13 @@ combinators and with the language architecture and implementation process we
 discussed in class.
 
 ## Checklist
- - [ ] [Sign up for teams][Teams]. One team will have three people; all other 
+ - [x] [Sign up for teams][Teams]. One team will have three people; all other 
     teams will have two people
- - [ ] Describe your design in `design.md` 
- - [ ] Before you implement the syntax, write the "empty room" program in
+ - [x] Describe your design in `design.md` 
+ - [x] Before you implement the syntax, write the "empty room" program in
      `example-ideal.txt`
 - [ ] Implement the syntax
-     - [ ] Add files, as needed, to implement your syntax. Use the language
+     - [x] Add files, as needed, to implement your syntax. Use the language
      architecture we discussed in class (more details below), and use parser
      combinators to implement your parser.
      - Include at least two example programs
