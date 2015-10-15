@@ -13,12 +13,12 @@ object PiconotParser extends JavaTokenParsers with PackratParsers {
     
     def word(s: String): Parser[String] = ident.filter(_ == s)
     
-    val reserved = "else move up down left right north south east west n s e w open free blocked closed".split(" ")
+    
     //lazy val ident2: PackratParser[String] = ident.filter(s => !(reserved contains s))
     
     def ident2: PackratParser[String] = new PackratParser[String] {
       def apply(in: Input): ParseResult[String] = {
-        val reserved = List("else")
+        val reserved = "else move up down left right north south east west n s e w open free blocked closed".split(" ")
         val parse = ident(in)
         parse match {
           case Success(word, _) => if (reserved contains word) {
@@ -33,8 +33,8 @@ object PiconotParser extends JavaTokenParsers with PackratParsers {
     
     // transformer
     lazy val transformer: PackratParser[Transformer] =
-      (  move~word("else")~transformers ^^ {case mov~word("else")~trans => new ElseTransformerBasic(mov, trans)}  
-         | move~transformers~word("else")~transformers ^^ {case mov~trans1~word("else")~trans2 => new ElseTransformerComplex(mov, trans1, trans2)} 
+      (  move~word("else")~transformers ^^ {case mov~"else"~trans => new ElseTransformerBasic(mov, trans)}  
+         | move~transformers~word("else")~transformers ^^ {case mov~trans1~"else"~trans2 => new ElseTransformerComplex(mov, trans1, trans2)} 
          | augment~separator~transformers ^^ {case aug~s~trans => new AugmentTransformer(aug, trans)}
          | augment~"{"~multiTransformer~"}" ^^ {case aug~"{"~mTrans~"}" => new AugmentTransformer(aug, new BracedTransformers(mTrans))}
          | augment ^^ {aug => new BaseTransformer(aug)}
@@ -56,13 +56,13 @@ object PiconotParser extends JavaTokenParsers with PackratParsers {
     lazy val augment: PackratParser[Augment] =
       (  move ^^ { move => move}
          | word("stay") ^^ { _ => new Stay()}
-         | word("state")~ident2 ^^ {case word("state")~s => new StateDef(s)}
+         | word("state")~ident2 ^^ {case "state"~s => new StateDef(s)}
          | dir~restrictdef ^^ {case d~r => new Restrict(d,r)}
          | ident2 ^^ {case s => new MoveState(s)}
       )
       
     lazy val move: PackratParser[Move] =
-      ( word("move")~dir ^^ {case word("move")~d => 
+      ( word("move")~dir ^^ {case "move"~d => 
         println("Move dir:", d)
         new Move(d)} )
       
