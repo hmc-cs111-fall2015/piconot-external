@@ -3,3 +3,4 @@ state Start
   Rclosed Fopen -> go Forward
   Rclosed Fclosed Lopen -> turn Left go Forward
   Any -> turn Back go Forward
+  

@@ -2,6 +2,7 @@ package picolang
 
 import java.io.File
 import scalafx.application.JFXApp
+import scalafx.application.Platform
 import scala.util.parsing.combinator._
 
 import picolang.semantics._
@@ -26,12 +27,14 @@ object runner extends JFXApp {
           object Bot extends Picobot(maze, rules) with TextDisplay with GUIDisplay
           Bot.run()
           stage = Bot.mainStage
-        case err: parser.NoSuccess =>
-          Console.err.println(err.msg)
-          System.exit(1)
+        case parser.NoSuccess(msg, rest) =>
+          val pos = rest.pos
+          Console.err.println(pos.longString)
+          Console.err.println("Bot file position " + pos.toString + ": " + msg)
+          Platform.exit()
       }
     case _ =>
       Console.err.println("Please provide --maze=file and --bot=file parameters")
-      System.exit(2)
+      Platform.exit()
   }
 }

@@ -6,6 +6,11 @@ import scala.util.parsing.combinator._
 
 /**
  * @author apinson dhouck
+ * 
+ * Note: This provides better error messages than default, but we couldn't
+ * figure out how to precisely control which of several applicable error
+ * messages was chosen. We also do not handle the various types of semantic
+ * errors possible, only syntactic ones.
  */
 object parser extends JavaTokenParsers with PackratParsers{
   
@@ -15,34 +20,38 @@ object parser extends JavaTokenParsers with PackratParsers{
   /**
    * Each state is defined by "state STATENAME", followed by one or more rules
    */
-  lazy val state: PackratParser[State] = log(
+  lazy val state: PackratParser[State] = (
     rword("state")~>name~rule.+ ^^ { case n~rs => new State(n, rs) }
-    )("state")
+    | rword("state")~name~>failure("Expected list of rules")
+    )
   
     /**
      * Each rule is defined by one or more surroundings, or "Any",
      * followed by "->" and then instructions
      */
-  lazy val rule: PackratParser[Rule] = log(
+  lazy val rule: PackratParser[Rule] = (
     
     surroundings~"->"~rep1sep(action, ",".?)~(",".? ~>transition).? ^^ {
       case surr~"->"~actions~transition => new Rule(surr, actions, transition)
       }
     | surroundings~"->"~transition ^^ {case surr~"->"~transition =>
                                         new Rule(surr, List(), Some(transition))}
-  )("rule")
+    | failure("Expected list of instructions")
+  )
   
   
-  lazy val action: PackratParser[Action] = log(
+  lazy val action: PackratParser[Action] = (
       rword("go")~>direction ^^ {Go(_)}
       | rword("turn")~>direction ^^ {Turn(_)}
-    )("action")
+      | failure("Expected action (e.g., \"go North\")")
+    )
   
-  lazy val transition: PackratParser[Name] = log(
-    rword("transition")~>name  
-    )("transition")
+  lazy val transition: PackratParser[Name] = (
+    rword("transition")~>name 
+    | failure ("Expected transition (e.g., \"transition Start\")")
+    )
   
-  lazy val direction: PackratParser[Direction] = log(
+  lazy val direction: PackratParser[Direction] = (
     rword("North") ^^^ North
     | rword("East") ^^^ East
     | rword("West") ^^^ West
@@ -51,28 +60,28 @@ object parser extends JavaTokenParsers with PackratParsers{
     | rword("Back") ^^^ Back
     | rword("Left") ^^^ Left
     | rword("Right") ^^^ Right
-    )("direction")
+    ) withFailureMessage "Expected direction (e.g., \"North\")"
   
     /**
    * If there are surroundings to parse, create a map
    * that our AST can treat as its Rule's surroundings
    */
-  lazy val surroundings: PackratParser[Map[Direction, Boolean]] = log( // TODO: error handling for consistency (no Nopen, Nclosed)
+  lazy val surroundings: PackratParser[Map[Direction, Boolean]] =  (
       rep1sep(surrounding, ",".?) ^^ {_.toMap}
-      | "Any" ^^^ Map[Direction, Boolean]()
-      )("surroundings")
+      | rword("Any") ^^^ Map[Direction, Boolean]()
+      ) withFailureMessage "Expected list of surroundings specifications"
     
 
   /**
    *  Each surroundings is a letter representing a direction
    *  followed by open or closed
    */
-  lazy val surrounding: PackratParser[(Direction, Boolean)] = log(
+  lazy val surrounding: PackratParser[(Direction, Boolean)] = (
     dirChar~"open" ^^ { case dir~"open" => (dir, true) }
     | dirChar~"closed" ^^ { case dir~"closed" => (dir, false) }
-    )("surrounding")
+    )
     
-  lazy val dirChar: PackratParser[Direction] = log(
+  lazy val dirChar: PackratParser[Direction] = (
     "N" ^^^ North
     | "E" ^^^ East
     | "W" ^^^ West
@@ -81,10 +90,10 @@ object parser extends JavaTokenParsers with PackratParsers{
     | "B" ^^^ Back
     | "L" ^^^ Left
     | "R" ^^^ Right
-    )("dirChar")
+    )
   
   def rword(word: String): PackratParser[String] = {
-    ident filter {_ == word}
+    ident filter {_ == word} withFailureMessage "Expected reserved word <" + word + ">."
   }
   def name: Parser[Name] = ident
 }
