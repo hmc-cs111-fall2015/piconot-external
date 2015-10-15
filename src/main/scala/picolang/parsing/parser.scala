@@ -6,6 +6,11 @@ import scala.util.parsing.combinator._
 
 /**
  * @author apinson dhouck
+ * 
+ * Note: This provides better error messages than default, but we couldn't
+ * figure out how to precisely control which of several applicable error
+ * messages was chosen. We also do not handle the various types of semantic
+ * errors possible, only syntactic ones.
  */
 object parser extends JavaTokenParsers with PackratParsers{
   
@@ -16,7 +21,8 @@ object parser extends JavaTokenParsers with PackratParsers{
    * Each state is defined by "state STATENAME", followed by one or more rules
    */
   lazy val state: PackratParser[State] = (
-    "state"~whiteSpace~>name~rule.+ ^^ { case n~rs => new State(n, rs) }
+    rword("state")~>name~rule.+ ^^ { case n~rs => new State(n, rs) }
+    | rword("state")~name~>failure("Expected list of rules")
     )
   
     /**
@@ -30,40 +36,40 @@ object parser extends JavaTokenParsers with PackratParsers{
       }
     | surroundings~"->"~transition ^^ {case surr~"->"~transition =>
                                         new Rule(surr, List(), Some(transition))}
+    | failure("Expected list of instructions")
   )
   
   
   lazy val action: PackratParser[Action] = (
-      "go"~>direction ^^ {Go(_)}
-      | "turn"~>direction ^^ {Turn(_)}
+      rword("go")~>direction ^^ {Go(_)}
+      | rword("turn")~>direction ^^ {Turn(_)}
+      | failure("Expected action (e.g., \"go North\")")
     )
   
   lazy val transition: PackratParser[Name] = (
-    "transition"~>name  
+    rword("transition")~>name 
+    | failure ("Expected transition (e.g., \"transition Start\")")
     )
   
   lazy val direction: PackratParser[Direction] = (
-    "North" ^^^ North
-    | "East" ^^^ East
-    | "West" ^^^ West
-    | "South" ^^^ South
-    | "Forward" ^^^ Forward
-    | "Back" ^^^ Back
-    | "Left" ^^^ Left
-    | "Right" ^^^ Right
-    )
+    rword("North") ^^^ North
+    | rword("East") ^^^ East
+    | rword("West") ^^^ West
+    | rword("South") ^^^ South
+    | rword("Forward") ^^^ Forward
+    | rword("Back") ^^^ Back
+    | rword("Left") ^^^ Left
+    | rword("Right") ^^^ Right
+    ) withFailureMessage "Expected direction (e.g., \"North\")"
   
     /**
    * If there are surroundings to parse, create a map
    * that our AST can treat as its Rule's surroundings
    */
-  lazy val surroundings: PackratParser[Map[Direction, Boolean]] = ( // TODO: error handling for consistency (no Nopen, Nclosed)
+  lazy val surroundings: PackratParser[Map[Direction, Boolean]] =  (
       rep1sep(surrounding, ",".?) ^^ {_.toMap}
-      | "Any" ^^^ Map[Direction, Boolean](North -> true, 
-                                          East -> true,
-                                          West -> true,
-                                          South -> true)
-      )
+      | rword("Any") ^^^ Map[Direction, Boolean]()
+      ) withFailureMessage "Expected list of surroundings specifications"
     
 
   /**
@@ -86,6 +92,8 @@ object parser extends JavaTokenParsers with PackratParsers{
     | "R" ^^^ Right
     )
   
+  def rword(word: String): PackratParser[String] = {
+    ident filter {_ == word} withFailureMessage "Expected reserved word <" + word + ">."
+  }
   def name: Parser[Name] = ident
-  
 }

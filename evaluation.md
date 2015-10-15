@@ -16,3 +16,7 @@ We also need to make sure "Nopen" and such are valid and check if the parser wil
 We found that "N open" is allowed, and decided to let users use this notation.
 
 Currently, "goNorthtransitionSweep" is allowed, so we need to add whitespace requirements.
+
+We did this by using the `ident` parser even for keywords.
+
+We did not get as much error handling done as ideal.

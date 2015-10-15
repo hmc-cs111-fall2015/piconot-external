@@ -62,7 +62,7 @@ class Rule(val surroundings: Map[Direction, Boolean], val actions: Seq[Action],
         val description = if (open) "open" else "closed"
         letter + description
     }
-    val actionString = (actions reverse) mkString " "
+    val actionString = actions mkString " "
     val transitionString = transition map {"transition \"" + _ + "\""} getOrElse ""
     s"rule $surroundingString $actionString $transitionString"
   }
@@ -71,6 +71,6 @@ class Rule(val surroundings: Map[Direction, Boolean], val actions: Seq[Action],
 /** States are collections of rules for various surroundings */
 class State(val name: Name, val rules: List[Rule]) {
   override def toString: String = {
-    "State \"" + name + "\"\n\t" + ((rules reverse) mkString "\n\t") + "\n"
+    "state \"" + name + "\"\n\t" + (rules mkString "\n\t") + "\n"
   }
 }
