@@ -1,4 +1,4 @@
-maze
+empty
 state leftCorner {
     move left;
     else move north -> topCorner
