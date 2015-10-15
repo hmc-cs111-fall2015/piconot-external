@@ -6,6 +6,9 @@
 * There are currently more seperators than we want in an example program, but we can correct for that after we deal with "else".
 * We have a working version with elses... have to use semi-colons to separate each of the states. Trying to remove those, might be harder than we think.
 * The semi-colons are gone.
+* We were using the text to test our code and now we found out that our set up was incorrect for using JFXApp and the GUIDisplay.
+*Fixed the GUIDisplay :-)
+
 
 ## Required Questions
 ### On a scale of 1–10 (where 10 is "a lot"), how much did
