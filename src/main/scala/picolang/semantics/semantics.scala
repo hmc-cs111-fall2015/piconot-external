@@ -5,7 +5,7 @@ import picolang.ir._
 /**
  * @author apinson dhouck
  */
-object semantics {
+private object semantics {
   import picolib.{semantics => lib}
   
   protected def toStateName(name: Name, dir: Direction): String = name + " " + dir.toString
@@ -97,7 +97,7 @@ object semantics {
   }
   
   /** Converts an AST to a list of picolib rules */
-  protected def toRule(ast: AST): List[lib.Rule] = {
+  def toRule(ast: AST): List[lib.Rule] = {
     (ast.reverse flatMap {state =>
       state.rules.reverse flatMap {(rule: Rule) =>
         List(North, East, South, West) flatMap {dir =>
