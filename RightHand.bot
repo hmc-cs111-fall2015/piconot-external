@@ -1,0 +1,19 @@
+// If facing north, go east if possible, otherwise turn west
+ *      *  |  *      * 
+*N_ -> * E | *N# -> *W#
+ *      *  |  *      * 
+
+// If facing east, go south if possible, otherwise turn north
+ *      *  |  *      * 
+*E* -> * * | *E* -> *N*
+ _      S  |  #      # 
+
+// If facing south, go west if possible, otherwise turn east
+ *      *  |  *      * 
+_S* -> W * | #S* -> #E*
+ *      *  |  *      * 
+
+// If facing west, go north if possible, otherwise turn south
+ _      N  |  #      # 
+*W* -> * * | *W* -> *S*
+ *      *  |  *      * 
